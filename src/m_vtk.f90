@@ -11,7 +11,8 @@ module m_vtk
     private; public :: s_save_data, &
         s_open_vtk_data_file, &
         s_write_variable_to_vtk_file, &
-        s_close_vtk_data_file
+        s_close_vtk_data_file, &
+        s_write_parallel_vtk_data_file
 
 contains
 
@@ -147,5 +148,9 @@ contains
         write(str, '(E16.8)') d
 
    end function
+
+    subroutine s_write_parallel_vtk_data_file()
+
+    end subroutine s_write_parallel_vtk_data_file
 
 end module m_vtk

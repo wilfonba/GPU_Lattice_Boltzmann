@@ -10,7 +10,13 @@ module m_mpi_proxy
 
     real(kind(0d0)), dimension(:), allocatable :: q_buff_send, q_buff_recv
 
-    private; public :: s_initialize_mpi
+    private; public :: s_initialize_mpi, &
+        s_mpi_abort, &
+        s_broadcast_user_input, &
+        s_initialize_mpi_module, &
+        s_finalize_mpi_module, &
+        s_mpi_exchange_ghost_cells, &
+        s_finalize_mpi_module
 
 contains
 
@@ -41,6 +47,13 @@ contains
 
     end subroutine s_mpi_abort
 
+    subroutine s_broadcast_user_input()
+
+        call MPI_BCAST(problemID, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ierr)
+        call MPI_BCAST(case_dir, len(case_dir), MPI_CHARACTER, 0, MPI_COMM_WORLD, ierr)
+
+    end subroutine s_broadcast_user_input
+
     subroutine s_initialize_mpi_module()
 
         call s_mpi_initialize()
@@ -69,21 +82,9 @@ contains
 
     end subroutine s_finalize_mpi_module
 
-    subroutine s_decompose_computational_domain
-
-        if (p > 0) then
-
-        else
-
-        end if
-
-    end subroutine s_decompose_computational_domain
-
     subroutine s_mpi_exchange_ghost_cells(dir)
 
         integer, intent(in) :: dir
-
-
 
     end subroutine s_mpi_exchange_ghost_cells
 

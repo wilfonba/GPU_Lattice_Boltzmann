@@ -1,0 +1,11 @@
+# The fortran modules provided by this target.
+provides
+ m_boundary_conditions.mod
+ m_derived_types.mod
+ m_global_parameters.mod
+ m_helpers.mod
+ m_lattice_boltzmann.mod
+ m_module.mod
+ m_mpi_proxy.mod
+ m_problem_setup.mod
+ m_vtk.mod
