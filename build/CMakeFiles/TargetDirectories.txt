@@ -1,3 +1,0 @@
-/Users/benwilfong/Documents/CourseWork/GPU_Lattice_Boltzmann/build/CMakeFiles/my_mpi_program.dir
-/Users/benwilfong/Documents/CourseWork/GPU_Lattice_Boltzmann/build/CMakeFiles/edit_cache.dir
-/Users/benwilfong/Documents/CourseWork/GPU_Lattice_Boltzmann/build/CMakeFiles/rebuild_cache.dir
