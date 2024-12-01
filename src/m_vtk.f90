@@ -18,21 +18,18 @@ contains
     ! save_count: The number of the save
     subroutine s_save_data(Q, save_count)
 
-        type(scalar_field), dimension(0:) :: Q
+        real(kind(0d0)), dimension(0:,0:,0:,0:) :: Q
         integer :: save_count
 
         call s_open_vtk_data_file(save_count)
 
-        !$acc update host(Q(0)%sf)
-        call s_write_variable_to_vtk_file(Q(0)%sf, 'density')
-        !$acc update host(Q(1)%sf)
-        call s_write_variable_to_vtk_file(Q(1)%sf, 'x-velocity')
-        !$acc update host(Q(2)%sf)
-        call s_write_variable_to_vtk_file(Q(2)%sf, 'y-velocity')
+        !$acc update host(Q)
+        call s_write_variable_to_vtk_file(Q(:,:,:,0), 'density')
+        call s_write_variable_to_vtk_file(Q(:,:,:,1), 'x-velocity')
+        call s_write_variable_to_vtk_file(Q(:,:,:,2), 'y-velocity')
 
         if (num_dims == 3) then
-            !$acc update host(Q(3)%sf)
-            call s_write_variable_to_vtk_file(Q(3)%sf, 'z-velocity')
+            call s_write_variable_to_vtk_file(Q(:,:,:,3), 'z-velocity')
         end if
 
         call s_close_vtk_data_file()

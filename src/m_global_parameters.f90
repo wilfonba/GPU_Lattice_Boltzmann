@@ -31,6 +31,10 @@ module m_global_parameters
 
     !$acc declare create(time_info, decomp_info, coll_op, coord_info)
 
+    real(kind(0d0)) :: C
+
+    !$acc declare create(C)
+
     public
 
 contains

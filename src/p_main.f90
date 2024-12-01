@@ -12,9 +12,9 @@ program p_main
 
     integer :: i
 
-    real(kind(0d0)) :: t_start, t_stop
+    real(kind(0d0)) :: t_start, t_stop, t_comp, t_io
 
-    type(scalar_field), dimension(:), allocatable :: Q
+    real(kind(0d0)), dimension(:,:,:,:), allocatable :: Q
     real(kind(0d0)), dimension(:,:,:,:), allocatable :: f,fEq
 
     if (num_dims == 2) call s_assign_D2Q9_collision_operator(coll_op)
@@ -33,22 +33,30 @@ program p_main
 
     call s_save_data(Q,0)
 
-    call cpu_time(t_start)
+    t_comp = 0d0; t_io = 0d0
+
     do i = 1, time_info%t_step_stop
+        call cpu_time(t_start)
         call s_collision(Q,f,fEq)
         call s_streaming(f)
         call s_apply_boundary_conditions(f)
         call s_compute_prim_vars(Q, f)
+        call cpu_time(t_stop)
+        t_comp = t_comp + (t_stop - t_start)
+        print*, i
         if (mod(i, time_info%t_step_save) == 0) then
+            call cpu_time(t_start)
             call s_save_data(Q,i)
             print*, "Time step: ", i
+            call cpu_time(t_stop)
+            t_io = t_io + (t_stop - t_start)
         end if
     end do
-    call cpu_time(t_stop)
 
-    print*, "Elapsed time: ", t_stop - t_start
-    print*, "Time per iteration: ", (t_stop - t_start)/time_info%t_step_stop
-
+    print*, "Compute time: ", t_comp
+    print*, "Time per iteration: ", t_comp/time_info%t_step_stop
+    print*, "IO time: ", t_io
+    print*, "Time per io: ", t_io/(time_info%t_step_stop/time_info%t_step_save)
     call s_finalize_problem(Q, f, fEq)
 
 end program p_main

@@ -39,7 +39,7 @@ contains
     !  fEq: The equilibrium distribution function
     subroutine s_setup_problem(Q, f, fEq)
 
-        type(scalar_field), allocatable, dimension(:) :: Q
+        real(kind(0d0)), allocatable, dimension(:,:,:,:) :: Q
         real(kind(0d0)), allocatable, dimension(:,:,:,:) :: f, fEq
         integer :: i
 
@@ -51,10 +51,7 @@ contains
         end if
         !$acc enter data create(coord_info)
 
-        allocate(Q(0:num_dims))
-        do i = 0, num_dims
-            allocate(Q(i)%sf(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p))
-        end do
+        allocate(Q(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:num_dims))
         !$acc enter data create(Q)
 
         allocate(f(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:coll_op%Q))
@@ -81,7 +78,7 @@ contains
             case(0)
                 call s_setup_2D_lid_driven_cavity(Q)
             case(1)
-                call s_setup_3D_lid_driven_cavity()
+                call s_setup_3D_lid_driven_cavity(Q)
         end select
 
     end subroutine s_setup_problem
@@ -93,13 +90,9 @@ contains
     !  fEq: The equilibrium distribution function
     subroutine s_finalize_problem(Q, f, fEq)
 
-        type(scalar_field), allocatable, dimension(:) :: Q
+        real(kind(0d0)), allocatable, dimension(:,:,:,:) :: Q
         real(kind(0d0)),allocatable, dimension(:,:,:,:) :: f, fStar, fEq
         integer :: i
-
-        do i = 0, num_dims
-            deallocate(Q(i)%sf)
-        end do
 
         deallocate(Q)
 

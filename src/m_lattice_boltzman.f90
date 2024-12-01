@@ -161,39 +161,92 @@ contains
     subroutine s_collision(Q, f, fEq)
 
         real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f, fEq
-        type(scalar_field), dimension(0:num_dims) :: Q
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: Q
         integer :: i, j, k, l
         real(kind(0d0)) :: cidotu
 
-        real(kind(0d0)) :: C, rho, u, v, w
+        real(kind(0d0)) :: rho, u, v, w
 
         C = time_info%dt/time_info%tau
+        !$acc update device(C)
 
         if (num_dims == 2) then
             !$acc parallel loop vector gang collapse(2) default(present) private(rho, u, v, cidotu)
             do j = 0, decomp_info%n
                 do i = 0, decomp_info%m
-                    rho = Q(0)%sf(i,j,0)
-                    u = Q(1)%sf(i,j,0)
-                    v = Q(2)%sf(i,j,0)
-                    !$acc loop seq
-                    do l = 0, coll_op%Q - 1
-                        cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
-                        fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
-                        f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, k, l)
-                    end do
+                    rho = Q(i,j,0,0)
+                    u = Q(i,j,0,1)
+                    v = Q(i,j,0,2)
+
+                    ! Lattice site 0
+                    fEq(i,j,0,0) = rho*(4d0/9d0)*(1d0 + 1.5d0*(u*u + v*v))
+                    f(i,j,0,0) = f(i,j,0,0)*(1d0-C) + C*fEq(i,j,0,0)
+
+                    ! Lattice site 1
+                    cidotu = u
+                    fEq(i,j,0,1) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,1) = f(i,j,0,1)*(1d0-C) + C*feq(i, j, 0, 1)
+
+                    ! Lattice site 2
+                    cidotu = v
+                    fEq(i,j,0,2) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,2) = f(i,j,0,2)*(1d0-C) + C*feq(i, j, 0, 2)
+
+                    ! Lattice site 3
+                    cidotu = -1d0*u
+                    fEq(i,j,0,3) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,3) = f(i,j,0,3)*(1d0-C) + C*feq(i, j, 0, 3)
+
+                    ! Lattice site 4
+                    cidotu = -1d0*v
+                    fEq(i,j,0,4) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,4) = f(i,j,0,4)*(1d0-C) + C*feq(i, j, 0, 4)
+
+                    ! Lattice site 5
+                    cidotu = u + v
+                    fEq(i,j,0,5) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,5) = f(i,j,0,5)*(1d0-C) + C*feq(i, j, 0, 5)
+
+                    ! Lattice site 6
+                    cidotu = -1d0*u + v
+                    fEq(i,j,0,6) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,6) = f(i,j,0,6)*(1d0-C) + C*feq(i, j, 0, 6)
+
+                    ! Lattice site 7
+                    cidotu = -1d0*u - v
+                    fEq(i,j,0,7) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,7) = f(i,j,0,7)*(1d0-C) + C*feq(i, j, 0, 7)
+
+                    ! Lattice site 8
+                    cidotu = u - v
+                    fEq(i,j,0,8) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
+                    f(i,j,0,8) = f(i,j,0,8)*(1d0-C) + C*feq(i, j, 0, 8)
+
+                    !do l = 0, coll_op%Q - 1
+                        !cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
+                        !fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
+                            !4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
+                        !f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, 0, l)
+                    !end do
                 end do
             end do
         else
-            !$acc parallel loop vector gang collapse(3) default(present) private(rho, u, v, cidotu)
+            !$acc parallel loop vector gang default(present) private(rho, u, v, cidotu)
             do k = 0, decomp_info%p
                 do j = 0, decomp_info%n
                     do i = 0, decomp_info%m
-                        rho = Q(0)%sf(i,j,k)
-                        u = Q(1)%sf(i,j,k)
-                        v = Q(2)%sf(i,j,k)
-                        w = Q(3)%sf(i,j,k)
+                        rho = Q(i,j,k,0)
+                        u = Q(i,j,k,1)
+                        v = Q(i,j,k,2)
+                        w = Q(i,j,k,3)
                         !$acc loop seq
                         do l = 0, coll_op%Q - 1
                             cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
@@ -252,14 +305,14 @@ contains
         end do
 
         !$acc parallel loop vector gang default(present) collapse(2)
-        do j = 0, decomp_info%n - 1
+        do j = decomp_info%n, 1, -1
             do i = decomp_info%m, 1, -1
                 f(i,j,0,5) = f(i-1,j-1,0,5)
             end do
         end do
 
         !$acc parallel loop vector gang default(present) collapse(2)
-        do j = 0, decomp_info%n - 1
+        do j = decomp_info%n, 1, -1
             do i = 0, decomp_info%m - 1
                 f(i,j,0,6) = f(i+1,j-1,0,6)
             end do
@@ -295,7 +348,7 @@ contains
     !  f: a 4D array holding the distribution functions
     subroutine s_compute_prim_vars(Q, f)
 
-        type(scalar_field), dimension(0:num_dims), intent(in) :: Q
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: Q
         real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
 
         integer :: i, j, k, l
@@ -304,13 +357,13 @@ contains
             !$acc parallel loop vector gang default(present) collapse(2)
             do j = 0, decomp_info%n
                 do i = 0, decomp_info%m
-                    Q(0)%sf(i,j,0) = f(i,j,0,0) + f(i,j,0,1) + f(i,j,0,2) + &
+                    Q(i,j,0,0) = f(i,j,0,0) + f(i,j,0,1) + f(i,j,0,2) + &
                         f(i,j,0,3) + f(i,j,0,4) + f(i,j,0,5) + f(i,j,0,6) + &
                         f(i,j,0,7) + f(i,j,0,8)
-                    Q(1)%sf(i,j,0) = (f(i,j,0,1) + f(i,j,0,5) + f(i,j,0,8) - &
-                        f(i,j,0,3) - f(i,j,0,6) - f(i,j,0,7))/Q(0)%sf(i,j,0)
-                    Q(2)%sf(i,j,0) = (f(i,j,0,2) + f(i,j,0,5) + f(i,j,0,6) - &
-                        f(i,j,0,4) - f(i,j,0,7) - f(i,j,0,8))/Q(0)%sf(i,j,0)
+                    Q(i,j,0,1) = (f(i,j,0,1) + f(i,j,0,5) + f(i,j,0,8) - &
+                        f(i,j,0,3) - f(i,j,0,6) - f(i,j,0,7))/Q(i,j,0.0)
+                    Q(i,j,0,2) = (f(i,j,0,2) + f(i,j,0,5) + f(i,j,0,6) - &
+                        f(i,j,0,4) - f(i,j,0,7) - f(i,j,0,8))/Q(i,j,0,0)
                 end do
             end do
         elseif (num_dims == 3) then
@@ -318,18 +371,20 @@ contains
             do k = 0, decomp_info%p
                 do j = 0, decomp_info%n
                     do i = 0, decomp_info%m
-                        Q(0)%sf(i,j,k) = 0d0
-                        Q(1)%sf(i,j,k) = 0d0
-                        Q(2)%sf(i,j,k) = 0d0
+                        Q(i,j,k,0) = 0d0
+                        Q(i,j,k,1) = 0d0
+                        Q(i,j,k,2) = 0d0
+                        Q(i,j,k,3) = 0d0
                         !$acc loop seq
                         do l = 0, coll_op%Q - 1
-                            Q(0)%sf(i,j,k) = Q(0)%sf(i,j,k) + f(i,j,k,l)
-                            Q(1)%sf(i,j,k) = Q(1)%sf(i,j,k) + f(i,j,k,l)*coll_op%cx(l)
-                            Q(2)%sf(i,j,k) = Q(2)%sf(i,j,k) + f(i,j,k,l)*coll_op%cy(l)
+                            Q(i,j,k,0) = Q(i,j,k,0) + f(i,j,k,l)
+                            Q(i,j,k,1) = Q(i,j,k,1) + f(i,j,k,l)*coll_op%cx(l)
+                            Q(i,j,k,2) = Q(i,j,k,2) + f(i,j,k,l)*coll_op%cy(l)
+                            Q(i,j,k,3) = Q(i,j,k,3) + f(i,j,k,l)*coll_op%cy(l)
                         end do
-                        Q(1)%sf(i,j,k) = Q(1)%sf(i,j,k)/Q(0)%sf(i,j,k)
-                        Q(2)%sf(i,j,k) = Q(2)%sf(i,j,k)/Q(0)%sf(i,j,k)
-                        Q(3)%sf(i,j,k) = Q(3)%sf(i,j,k)/Q(0)%sf(i,j,k)
+                        Q(i,j,k,1) = Q(i,j,k,1)/Q(i,j,k,0)
+                        Q(i,j,k,2) = Q(i,j,k,2)/Q(i,j,k,0)
+                        Q(i,j,k,3) = Q(i,j,k,3)/Q(i,j,k,0)
                     end do
                 end do
             end do

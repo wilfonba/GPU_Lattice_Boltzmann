@@ -34,3 +34,6 @@
 build/*
 
 data/*
+
+*.nsys-ref
+*.sqlite

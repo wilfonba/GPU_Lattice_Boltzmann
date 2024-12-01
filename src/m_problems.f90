@@ -22,12 +22,12 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        decomp_info%m = 10
-        decomp_info%n = 10
+        decomp_info%m = 100
+        decomp_info%n = 100
 
         time_info%dt = 1d0
-        time_info%t_step_stop = 40000
-        time_info%t_step_save = 400
+        time_info%t_step_stop = 100000
+        time_info%t_step_save = 10000
 
         !$acc update device(decomp_info, time_info)
 
@@ -38,17 +38,16 @@ contains
     !  Q : A scalar_field that holds the primitive variables
     subroutine s_setup_2D_lid_driven_cavity(Q)
 
-        type(scalar_field), dimension(0:num_dims) :: Q
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: Q
 
         integer :: i, j
 
         !$acc parallel loop vector gang default(present) collapse(2)
         do j = 0, decomp_info%n
             do i = 0, decomp_info%m
-                print*, i, j
-                Q(0)%sf(i, j, 0) = 5d0
-                Q(1)%sf(i, j, 0) = 0d0
-                Q(2)%sf(i, j, 0) = 0d0
+                Q(i, j, 0, 0) = 5d0
+                Q(i, j, 0, 1) = 0d0
+                Q(i, j, 0, 2) = 0d0
             end do
         end do
 
@@ -59,11 +58,36 @@ contains
     ! =========================================================================
     subroutine s_get_3D_lid_driven_cavity()
 
+        ! Global number of grid points in each direction
+        decomp_info%m = 100
+        decomp_info%n = 100
+        decomp_info%p = 100
+
+        time_info%dt = 1d0
+        time_info%t_step_stop = 100000
+        time_info%t_step_save = 100000
+
+        !$acc update device(decomp_info, time_info)
+
     end subroutine s_get_3D_lid_driven_cavity
 
-    subroutine s_setup_3D_lid_driven_cavity()
+    subroutine s_setup_3D_lid_driven_cavity(Q)
+
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: Q
 
         integer :: i, j, k
+
+        !$acc parallel loop vector gang default(present) collapse(3)
+        do k = 0, decomp_info%p
+            do j = 0, decomp_info%n
+                do i = 0, decomp_info%m
+                    Q(i, j, k, 0) = 5d0
+                    Q(i, j, k, 1) = 0d0
+                    Q(i, j, k, 2) = 0d0
+                    Q(i, j, k, 3) = 0d0
+                end do
+            end do
+        end do
 
     end subroutine s_setup_3D_lid_driven_cavity
 
