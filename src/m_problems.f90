@@ -27,7 +27,7 @@ contains
 
         time_info%dt = 1d0
         time_info%t_step_stop = 100000
-        time_info%t_step_save = 10000
+        time_info%t_step_save = 1000
 
         !$acc update device(decomp_info, time_info)
 

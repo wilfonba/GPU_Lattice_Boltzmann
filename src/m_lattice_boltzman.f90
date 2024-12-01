@@ -177,65 +177,13 @@ contains
                     rho = Q(i,j,0,0)
                     u = Q(i,j,0,1)
                     v = Q(i,j,0,2)
-
-                    ! Lattice site 0
-                    fEq(i,j,0,0) = rho*(4d0/9d0)*(1d0 + 1.5d0*(u*u + v*v))
-                    f(i,j,0,0) = f(i,j,0,0)*(1d0-C) + C*fEq(i,j,0,0)
-
-                    ! Lattice site 1
-                    cidotu = u
-                    fEq(i,j,0,1) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,1) = f(i,j,0,1)*(1d0-C) + C*feq(i, j, 0, 1)
-
-                    ! Lattice site 2
-                    cidotu = v
-                    fEq(i,j,0,2) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,2) = f(i,j,0,2)*(1d0-C) + C*feq(i, j, 0, 2)
-
-                    ! Lattice site 3
-                    cidotu = -1d0*u
-                    fEq(i,j,0,3) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,3) = f(i,j,0,3)*(1d0-C) + C*feq(i, j, 0, 3)
-
-                    ! Lattice site 4
-                    cidotu = -1d0*v
-                    fEq(i,j,0,4) = rho*(1d0/9d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,4) = f(i,j,0,4)*(1d0-C) + C*feq(i, j, 0, 4)
-
-                    ! Lattice site 5
-                    cidotu = u + v
-                    fEq(i,j,0,5) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,5) = f(i,j,0,5)*(1d0-C) + C*feq(i, j, 0, 5)
-
-                    ! Lattice site 6
-                    cidotu = -1d0*u + v
-                    fEq(i,j,0,6) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,6) = f(i,j,0,6)*(1d0-C) + C*feq(i, j, 0, 6)
-
-                    ! Lattice site 7
-                    cidotu = -1d0*u - v
-                    fEq(i,j,0,7) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,7) = f(i,j,0,7)*(1d0-C) + C*feq(i, j, 0, 7)
-
-                    ! Lattice site 8
-                    cidotu = u - v
-                    fEq(i,j,0,8) = rho*(1d0/36d0)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
-                    f(i,j,0,8) = f(i,j,0,8)*(1d0-C) + C*feq(i, j, 0, 8)
-
-                    !do l = 0, coll_op%Q - 1
-                        !cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
-                        !fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
-                            !4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
-                        !f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, 0, l)
-                    !end do
+                    !$acc loop seq
+                    do l = 0, coll_op%Q - 1
+                        cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
+                        fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
+                            4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
+                        f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, 0, l)
+                    end do
                 end do
             end do
         else
@@ -361,7 +309,7 @@ contains
                         f(i,j,0,3) + f(i,j,0,4) + f(i,j,0,5) + f(i,j,0,6) + &
                         f(i,j,0,7) + f(i,j,0,8)
                     Q(i,j,0,1) = (f(i,j,0,1) + f(i,j,0,5) + f(i,j,0,8) - &
-                        f(i,j,0,3) - f(i,j,0,6) - f(i,j,0,7))/Q(i,j,0.0)
+                        f(i,j,0,3) - f(i,j,0,6) - f(i,j,0,7))/Q(i,j,0,0)
                     Q(i,j,0,2) = (f(i,j,0,2) + f(i,j,0,5) + f(i,j,0,6) - &
                         f(i,j,0,4) - f(i,j,0,7) - f(i,j,0,8))/Q(i,j,0,0)
                 end do

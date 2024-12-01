@@ -6,6 +6,7 @@ program p_main
     use m_lattice_boltzmann
     use m_boundary_conditions
     use m_vtk
+    use m_helper
     ! =======================================================
 
     implicit none
