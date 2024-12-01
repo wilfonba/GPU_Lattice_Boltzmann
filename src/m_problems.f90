@@ -22,12 +22,12 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        decomp_info%m = 100
-        decomp_info%n = 100
+        decomp_info%m = 1000
+        decomp_info%n = 1000
 
         time_info%dt = 1d0
-        time_info%t_step_stop = 100000
-        time_info%t_step_save = 1000
+        time_info%t_step_stop = 10
+        time_info%t_step_save = 10
 
         !$acc update device(decomp_info, time_info)
 
