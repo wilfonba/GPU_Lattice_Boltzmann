@@ -170,7 +170,7 @@ contains
         C = time_info%dt/time_info%tau
 
         if (num_dims == 2) then
-            !$acc parallel loop vector gane collapse(2) default(present) private(rho, u, v, cidotu)
+            !$acc parallel loop vector gang collapse(2) default(present) private(rho, u, v, cidotu)
             do j = 0, decomp_info%n
                 do i = 0, decomp_info%m
                     rho = Q(0)%sf(i,j,0)
@@ -186,7 +186,7 @@ contains
                 end do
             end do
         else
-            !$acc parallel loop vector gane collapse(3) default(present) private(rho, u, v, cidotu)
+            !$acc parallel loop vector gang collapse(3) default(present) private(rho, u, v, cidotu)
             do k = 0, decomp_info%p
                 do j = 0, decomp_info%n
                     do i = 0, decomp_info%m

@@ -22,8 +22,8 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        decomp_info%m = 200
-        decomp_info%n = 200
+        decomp_info%m = 10
+        decomp_info%n = 10
 
         time_info%dt = 1d0
         time_info%t_step_stop = 40000
@@ -44,7 +44,8 @@ contains
 
         !$acc parallel loop vector gang default(present) collapse(2)
         do j = 0, decomp_info%n
-            do i = 0, decomp_info%n
+            do i = 0, decomp_info%m
+                print*, i, j
                 Q(0)%sf(i, j, 0) = 5d0
                 Q(1)%sf(i, j, 0) = 0d0
                 Q(2)%sf(i, j, 0) = 0d0

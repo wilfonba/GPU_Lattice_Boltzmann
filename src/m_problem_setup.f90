@@ -107,7 +107,7 @@ contains
 
         deallocate(fEq)
 
-        !$acc exit dat delete(Q, f, fEq)
+        !$acc exit data delete(Q, f, fEq)
 
     end subroutine s_finalize_problem
 
