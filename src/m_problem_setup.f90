@@ -2,93 +2,113 @@ module m_problem_setup
 
    ! Dependencies =======================
     use m_global_parameters
-    use m_mpi
     use m_derived_types
+    use m_problems
     ! ====================================
 
     implicit none
 
-    integer :: i, j, k ! Standard loop indices
-
-    public; private :: s_get_problem
+    private; public :: s_get_problem, &
+        s_setup_problem, &
+        s_finalize_problem
 
 contains
 
+    ! This subroutine gets the static parameters that describe the boundary
+    ! conditions, computational domain, and discretization for a problem. It
+    ! gets this information by call the subroutine s_get_<case> for a specific
+    ! <case>
     subroutine s_get_problem()
 
+        ! Get case specific details
         select case(problemID)
             case(0)
                 call s_get_2D_lid_driven_cavity()
             case(1)
-                call s_get_2D_laminar_boundary_layer()
-            case(2)
-                call s_get_2D_laminar_channel_flow()
-            case(3)
-                call s_get_3D_flow_over_sphere()
-            case(4)
-                call s_get_3D_rayleigh_taylor_instability()
-            case default
-                call s_mpi_abort("Invalid problem ID")
+                call s_get_3D_lid_driven_cavity()
         end select
 
     end subroutine s_get_problem
 
-    subroutine s_get_2D_lid_driven_cavity()
+    ! This subroutine allocates memory time variables given the information
+    ! provided by s_get_problem. This subroutine allocates variables that all
+    ! cases will use and then calls the respective s_get_<case> subroutine to
+    ! assign the initial condition. Its inputs are:
+    !  Q: The scalar field that will be used to store the initial condition
+    !  f: The distribution function
+    !  fEq: The equilibrium distribution function
+    subroutine s_setup_problem(Q, f, fEq)
 
-        ! Global number of grid points in each direction
-        decomp_info%m_global = 128
-        decomp_info%n_global = 128
+        type(scalar_field), allocatable, dimension(:) :: Q
+        real(kind(0d0)), allocatable, dimension(:,:,:,:) :: f, fEq
+        integer :: i
 
-        ! Number of processors in each direction
-        decomp_info%p_x = 1
-        decomp_info%p_y = 1
+        ! Allocating cell boundary locations
+        allocate(coord_info%x_cb(0:decomp_info%m + 1))
+        allocate(coord_info%y_cb(0:decomp_info%n + 1))
+        if (num_dims == 3) then
+            allocate(coord_info%z_cb(0:decomp_info%p + 1))
+        end if
+        !$acc enter data create(coord_info)
 
-        ! Global domain extents
-        coord_info%x_min = 0.0d0
-        coord_info%x_max = 1.0d0
-        coord_info%y_min = 0.0d0
-        coord_info%y_max = 1.0d0
+        allocate(Q(0:num_dims))
+        do i = 0, num_dims
+            allocate(Q(i)%sf(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p))
+        end do
+        !$acc enter data create(Q)
 
-        ! Set global boundary conditions
-        bc_info%bc_x%beg = 1
-        bc_info%bc_x%end = 1
-        bc_info%bc_y%beg = 1
-        bc_info%bc_y%end = 1
+        allocate(f(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:coll_op%Q))
+        allocate(fEq(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:coll_op%Q))
+        !$acc enter data create(f, fEq)
 
-        call s_get_local_problem_setup()
+        do i = 0, decomp_info%m + 1
+            coord_info%x_cb(i) = i
+        end do
 
-        ! Assign initial condition
-        do k = 0, decomp_info%p
-            do j = 0, decom_info%n
-                do i = 0, decomp_info%m
-                    ! Assign pressure
-                    Q(1)%sf(i, j, k) = 1d0
+        do i = 0, decomp_info%m + 1
+            coord_info%y_cb(i) = i
+        end do
 
-                    ! Assign x-momentum
-                    Q(2)%sf(i, j, k) = 0.0d0
-
-                    ! Assign y-momentum
-                    Q(3)%sf(i, j, k) = 0.0d0
-                end do
+        if (num_dims == 3) then
+            do i = 0, decomp_info%p + 1
+                coord_info%z_cb(i) = i
             end do
         end if
+        !$acc update device(coord_info)
 
-    end subroutine s_get_2D_lid_driven_cavity
+        ! Setup case specific details
+        select case(problemID)
+            case(0)
+                call s_setup_2D_lid_driven_cavity(Q)
+            case(1)
+                call s_setup_3D_lid_driven_cavity()
+        end select
 
-    subroutine s_get_2D_laminar_boundary_layer()
+    end subroutine s_setup_problem
 
-    end subroutine s_get_2D_laminar_boundary_layer
+    ! This subroutine deallocates memory for the variables that were allocated.
+    ! Its inputs are:
+    !  Q: The scalar field that will be used to store the initial condition
+    !  f: The distribution function
+    !  fEq: The equilibrium distribution function
+    subroutine s_finalize_problem(Q, f, fEq)
 
-    subroutine s_get_2D_laminar_channel_flow()
+        type(scalar_field), allocatable, dimension(:) :: Q
+        real(kind(0d0)),allocatable, dimension(:,:,:,:) :: f, fStar, fEq
+        integer :: i
 
-    end subroutine s_get_2D_laminar_channel_flow
+        do i = 0, num_dims
+            deallocate(Q(i)%sf)
+        end do
 
-    subroutine s_get_3D_flow_over_sphere()
+        deallocate(Q)
 
-    end subroutine s_get_3D_flow_over_sphere
+        deallocate(f)
 
-    subroutine s_get_3D_rayleigh_taylor_instability()
+        deallocate(fEq)
 
-    end subroutine s_get_3D_rayleigh_taylor_instability
+        !$acc exit dat delete(Q, f, fEq)
+
+    end subroutine s_finalize_problem
 
 end module m_problem_setup

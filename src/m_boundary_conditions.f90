@@ -3,7 +3,6 @@ module m_boundary_conditions
     ! Dependencies ==========================================
     use m_global_parameters
     use m_derived_types
-    use m_mpi_proxy
     ! =======================================================
 
     implicit none
@@ -12,130 +11,76 @@ module m_boundary_conditions
 
 contains
 
-    subroutine s_apply_boundary_conditions()
+    ! This subroutine selects the correct boundary conditions subroutine to call
+    ! It has one input:
+    ! f: the distribution function
+    subroutine s_apply_boundary_conditions(f)
 
-        ! x-direction =========================================================
-        select case(bc_x%beg) ! left x-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(1,1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(1,1)
-            case default ! processor domain
-                call s_populate_ghost_cells(1,1)
-        end select
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
 
-        select case(bc_x%end) ! right x-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(1,-1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(1,-1)
-            case default ! processor domain
-                call s_populate_ghost_cells(1,-1)
-        end select
-        ! =====================================================================
-
-        ! y-direction =========================================================
-        select case(bc_y%beg) ! left y-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(2,-1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(2,-1)
-            case default ! processor domain
-                call s_populate_ghost_cells(2,-1)
-        end select
-
-        select case(bc_y%end) ! right y-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(2,1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(2,1)
-            case default ! processor domain
-                call s_populate_ghost_cells(2,1)
-        end select
-        ! =====================================================================
-
-        ! z-direction =========================================================
-        select case(bc_z%beg) ! left z-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(3,-1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(3,-1)
-            case default ! processor domain
-                call s_populate_ghost_cells(3,-1)
-        end select
-
-        select case(bc_z%end) ! right z-direction BCs
-            case(0) ! no slip
-                call s_no_slip_bc(3,1)
-            case(1) ! prescribed velocity
-                call s_prescribed_velocity_bc(3,1)
-            case default ! processor domain
-                call s_populate_ghost_cells(3,1)
-        end select
-        ! =====================================================================
+        if (num_dims == 2) then
+            call s_apply_boundary_conditions_2d(f)
+        else
+            call s_apply_boundary_conditions_3d(f)
+        end if
 
     end subroutine s_apply_boundary_conditions
 
-    subroutine s_no_slip_bc(bc_dir, bc_loc)
+    ! This subroutine applies the boundary conditions to the distribution
+    ! function for the lid driven cavity problem in 2D. It has one input:
+    ! f: the distribution function
+    subroutine s_apply_boundary_conditions_2d(f)
 
-        integer :: bc_dir ! Boundary condition direction, X = 1, Y = 2, Z = 3
-        integer :: bc_loc ! Boundary location, -1 = left, 1 = right
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
 
-        ! x-direction =========================================================
-        if (bc_dir == 1) then ! x-direction
-            if (bc_loc == -1) then ! left
+        integer :: i
+        real(kind(0d0)) :: rhoW
 
-            elseif (bc_loc == 1) then ! right
+        ! Left bounce back
+        !$acc parallel loop gang vector default(present)
+        do i = 0, decomp_info%n
+            f(0, i, 0, 1) = f(0, i, 0, 3)
+            f(0, i, 0, 5) = f(0, i, 0, 7)
+            f(0, i, 0, 8) = f(0, i, 0, 6)
+        end do
 
-            end if
-        ! y-direction =========================================================
-        elseif (bc_dir == 2) then ! y-direction
-            if (bc_loc == -1) then ! left
+        ! Right bounce back
+        !$acc parallel loop gang vector default(present)
+        do i = 0, decomp_info%n
+            f(decomp_info%m, i, 0, 3) = f(decomp_info%m, i, 0, 1)
+            f(decomp_info%m, i, 0, 7) = f(decomp_info%m, i, 0, 5)
+            f(decomp_info%m, i, 0, 6) = f(decomp_info%m, i, 0, 8)
+        end do
 
-            elseif (bc_loc == 1) then ! right
+        ! Bottom bounce back
+        !$acc parallel loop gang vector default(present)
+        do i = 0, decomp_info%m
+            f(i, 0, 0, 2) = f(i, 0, 0, 4)
+            f(i, 0, 0, 5) = f(i, 0, 0, 7)
+            f(i, 0, 0, 6) = f(i, 0, 0, 8)
+        end do
 
-            end if
-        ! z-direction =========================================================
-        elseif (bc_dir == 3) then ! z-direction
-            if (bc_loc == -1) then ! left
+        ! Top moving lid
+        !$acc parallel loop gang vector default(present) private(rhoW)
+        do i = 1, decomp_info%m - 1
+            rhoW = f(i, decomp_info%n, 0, 0) + f(i, decomp_info%n, 0, 1) + &
+                f(i, decomp_info%n, 0, 3) + &
+                2.0d0 * (f(i, decomp_info%n, 0, 2) + &
+                f(i, decomp_info%n, 0, 5) + f(i, decomp_info%n, 0, 6))
+            f(i, decomp_info%n, 0, 4) = f(i, decomp_info%n, 0, 2)
+            f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5) - rhoW*lidVel/6.0
+            f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6) + rhoW*lidVel/6.0
+        end do
 
-            elseif (bc_loc == 1) then ! right
+    end subroutine s_apply_boundary_conditions_2d
 
-            end if
-        end if
-        ! =====================================================================
+    ! This subroutine applies the boundary conditions to the distribution
+    ! function for the lid driven cavity problem in 3D. It has one input:
+    ! f: the distribution function
+    subroutine s_apply_boundary_conditions_3d(f)
 
-    end subroutine s_no_slip_bc
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
 
-    subroutine s_no_slip_bc(bc_dir, bc_loc)
-
-        integer :: bc_dir ! Boundary condition direction, X = 1, Y = 2, Z = 3
-        integer :: bc_loc ! Boundary location, -1 = left, 1 = right
-
-        ! x-direction =========================================================
-        if (bc_dir == 1) then ! x-direction
-            if (bc_loc == -1) then ! left
-
-            elseif (bc_loc == 1) then ! right
-
-            end if
-        ! y-direction =========================================================
-        elseif (bc_dir == 2) then ! y-direction
-            if (bc_loc == -1) then ! left
-
-            elseif (bc_loc == 1) then ! right
-
-            end if
-        ! z-direction =========================================================
-        elseif (bc_dir == 3) then ! z-direction
-            if (bc_loc == -1) then ! left
-
-            elseif (bc_loc == 1) then ! right
-
-            end if
-        end if
-        ! =====================================================================
-
-    end subroutine s_no_slip_bc
+    end subroutine s_apply_boundary_conditions_3d
 
 end module m_boundary_conditions

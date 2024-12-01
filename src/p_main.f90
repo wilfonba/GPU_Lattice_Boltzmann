@@ -2,32 +2,53 @@ program p_main
 
     ! Dependencies ==========================================
     use m_global_parameters
-    use m_helpers
-    use m_mpi_proxy
+    use m_problem_setup
+    use m_lattice_boltzmann
+    use m_boundary_conditions
+    use m_vtk
     ! =======================================================
-
-    integer :: i
 
     implicit none
 
-    call s_mpi_initialize()
+    integer :: i
 
-    if (proc_rank == 0) call s_read_user_input()
+    real(kind(0d0)) :: t_start, t_stop
 
-    call s_broadcast_user_input()
+    type(scalar_field), dimension(:), allocatable :: Q
+    real(kind(0d0)), dimension(:,:,:,:), allocatable :: f,fEq
+
+    if (num_dims == 2) call s_assign_D2Q9_collision_operator(coll_op)
+    if (num_dims == 3) call s_assign_D3Q19_collision_operator(coll_op)
 
     call s_get_problem()
 
-    call s_initialize_modules()
+    call s_setup_problem(Q, f, fEq)
 
-    do i = 1, n_steps
+    lidVel = alpha*Re/decomp_info%m
+    time_info%tau = (3d0*alpha + 0.5d0)
 
-        call s_advance_solution()
+    !$acc update device(lidVel, time_info%tau)
 
+    print*, "Re = ", Re, "lidVel = ", lidVel, "tau = ", time_info%tau
+
+    call s_save_data(Q,0)
+
+    call cpu_time(t_start)
+    do i = 1, time_info%t_step_stop
+        call s_collision(Q,f,fEq)
+        call s_streaming(f)
+        call s_apply_boundary_conditions(f)
+        call s_compute_prim_vars(Q, f)
+        if (mod(i, time_info%t_step_save) == 0) then
+            call s_save_data(Q,i)
+            print*, "Time step: ", i
+        end if
     end do
+    call cpu_time(t_stop)
 
-    call s_finalize_modules()
+    print*, "Elapsed time: ", t_stop - t_start
+    print*, "Time per iteration: ", (t_stop - t_start)/time_info%t_step_stop
 
-    call s_mpi_finalize()
+    call s_finalize_problem(Q, f, fEq)
 
 end program p_main

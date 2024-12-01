@@ -2,8 +2,6 @@ module m_vtk
 
     ! Dependencies ==========================================
     use m_global_parameters
-
-    use m_helpers
     ! =======================================================
 
     implicit none
@@ -11,28 +9,31 @@ module m_vtk
     private; public :: s_save_data, &
         s_open_vtk_data_file, &
         s_write_variable_to_vtk_file, &
-        s_close_vtk_data_file, &
-        s_write_parallel_vtk_data_file
+        s_close_vtk_data_file
 
 contains
 
     ! this subrouting saves all of the simulation data. Its inputs are
     ! Q: A 1D array of sclalar fields with dimension (N+1) x (N+1)
-    ! n: The number of grid points in each direction
     ! save_count: The number of the save
-    subroutine s_save_data(Q, n, save_count)
+    subroutine s_save_data(Q, save_count)
 
-        type(scalar_field), dimension(1:) :: Q
-        real(kind(0d0)), dimension(0:N,0:N) :: data_wrt
-        integer :: n, save_count, i, j
+        type(scalar_field), dimension(0:) :: Q
+        integer :: save_count
 
-        call s_open_vtk_data_file(n, save_count)
+        call s_open_vtk_data_file(save_count)
 
-        call s_write_variable_to_vtk_file(Q(1)%sf(0:,0:), n, 'pressure')
+        !$acc update host(Q(0)%sf)
+        call s_write_variable_to_vtk_file(Q(0)%sf, 'density')
+        !$acc update host(Q(1)%sf)
+        call s_write_variable_to_vtk_file(Q(1)%sf, 'x-velocity')
+        !$acc update host(Q(2)%sf)
+        call s_write_variable_to_vtk_file(Q(2)%sf, 'y-velocity')
 
-        call s_write_variable_to_vtk_file(Q(2)%sf(0:,0:), n, 'x-velocity')
-
-        call s_write_variable_to_vtk_file(Q(3)%sf(0:,0:), n, 'y-velocity')
+        if (num_dims == 3) then
+            !$acc update host(Q(3)%sf)
+            call s_write_variable_to_vtk_file(Q(3)%sf, 'z-velocity')
+        end if
 
         call s_close_vtk_data_file()
 
@@ -42,7 +43,7 @@ contains
     ! grid to it. It requires the following inputs:
     ! N: The number of grid points in each direction
     ! n_save: The number of the save
-    subroutine s_open_vtk_data_file(N, n_save)
+    subroutine s_open_vtk_data_file(n_save)
 
         integer :: N, i, n_save
 
@@ -59,9 +60,15 @@ contains
         ! header
         write(3,"(A)") "<?xml version='1.0'?>"
         write(3,"(A)") "<VTKFile type='RectilinearGrid' version='0.1' byte_order='LittleEndian'>"
-        line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(N+1))//" "// &
-                trim(f_int_to_str(0))//" "//trim(f_int_to_str(N+1))//" "// &
-                trim(f_int_to_str(0))//" "//trim(f_int_to_str(0))
+        if (num_dims == 2) then
+            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%m + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%n + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(0))
+        else
+            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%m + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%n + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%p + 1))
+        end if
         write(3,"(A)") "    <RectilinearGrid WholeExtent='"//trim(line)//"'>"
         write(3,"(A)") "        <Piece Extent='"//trim(line)//"'>"
 
@@ -69,8 +76,8 @@ contains
         write(3,"(A)") "            <Coordinates>"
         write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
         write(3,"(A)",advance='no') "               "
-        do i = 0, N + 1
-            write(3,"(A)",advance='no') trim(f_dbl_to_str(xs_cb(i)))//" "
+        do i = 0, decomp_info%m + 1
+            write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%x_cb(i)))//" "
         end do
         write(3,*)
         write(3,"(A)") "                </DataArray>"
@@ -78,18 +85,29 @@ contains
         ! y-coordinates
         write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
         write(3,"(A)",advance='no') "               "
-        do i = 0, N + 1
-            write(3,"(A)",advance='no') trim(f_dbl_to_str(ys_cb(i)))//" "
+        do i = 0, decomp_info%n + 1
+            write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%y_cb(i)))//" "
         end do
         write(3,*)
         write(3,"(A)") "                </DataArray>"
 
         ! z-coordinates
-        write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
-        write(3,"(A)",advance='no') "               "
-        write(3,"(A)",advance='no') trim(f_dbl_to_str(0d0))//" "
-        write(3,"(A)") trim(f_dbl_to_str(0d0))
-        write(3,"(A)") "                </DataArray>"
+        if (num_dims == 2) then
+            write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
+            write(3,"(A)",advance='no') "               "
+            write(3,"(A)",advance='no') trim(f_dbl_to_str(0d0))//" "
+            write(3,"(A)") trim(f_dbl_to_str(0d0))
+            write(3,"(A)") "                </DataArray>"
+        else
+            write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
+            write(3,"(A)",advance='no') "               "
+            do i = 0, decomp_info%p + 1
+                write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%z_cb(i)))//" "
+            end do
+            write(3,*)
+            write(3,"(A)") "                </DataArray>"
+        end if
+
         write(3,"(A)") "            </Coordinates>"
 
         ! point data
@@ -102,18 +120,28 @@ contains
     !  Q: An (N + 1) x (N + 1) array to be stored
     !  N: The number of grid points in each direction
     !  name: The name to store the variable as
-    subroutine s_write_variable_to_vtk_file(Q, N, name)
+    subroutine s_write_variable_to_vtk_file(Q,  name)
 
-        real(kind(0d0)), dimension(0:, 0:) :: Q
-        integer :: i, j, N, idx
+        real(kind(0d0)), dimension(0:, 0:, 0:) :: Q
+        integer :: i, j, k
         character(len=*) :: name
 
         write(3,"(A)") "                <DataArray type='Float64' Name='"//trim(name)//"' format='ascii'>"
-        do i = 0, N
-            do j = 0, N
-                write(3,"(A)",advance='no') trim(f_dbl_to_str(Q(j,i)))//" "
+        if (num_dims == 2) then
+            do j = 0, decomp_info%n
+                do i = 0, decomp_info%m
+                    write(3,"(A)",advance='no') trim(f_dbl_to_str(Q(i,j,0)))//" "
+                end do
             end do
-        end do
+        else
+            do k = 0, decomp_info%p
+                do j = 0, decomp_info%n
+                    do i = 0, decomp_info%m
+                        write(3,"(A)",advance='no') trim(f_dbl_to_str(Q(i,j,k)))//" "
+                    end do
+                end do
+            end do
+        end if
         write(3,*)
         write(3,"(A)") "                </DataArray>"
 
@@ -148,9 +176,5 @@ contains
         write(str, '(E16.8)') d
 
    end function
-
-    subroutine s_write_parallel_vtk_data_file()
-
-    end subroutine s_write_parallel_vtk_data_file
 
 end module m_vtk
