@@ -171,7 +171,7 @@ contains
         !$acc update device(C)
 
         if (num_dims == 2) then
-            !$acc parallel loop vector gang collapse(2) default(present) private(rho, u, v, cidotu)
+            !$acc parallel loop collapse(2) gang vector default(present) private(rho, u, v, cidotu)
             do j = 0, decomp_info%n
                 do i = 0, decomp_info%m
                     rho = Q(i,j,0,0)
@@ -187,7 +187,7 @@ contains
                 end do
             end do
         else
-            !$acc parallel loop vector gang default(present) private(rho, u, v, cidotu)
+            !$acc parallel loop collapse(3) gang vector default(present) private(rho, u, v, cidotu)
             do k = 0, decomp_info%p
                 do j = 0, decomp_info%n
                     do i = 0, decomp_info%m
@@ -227,17 +227,17 @@ contains
 
         real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
 
-        integer :: i, j, k, l
+        integer :: i, j
 
         ! Side to side
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, decomp_info%n
             do i = decomp_info%m, 1, -1
                 f(i,j,0,1) = f(i-1,j,0,1)
             end do
         end do
 
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, decomp_info%n
             do i = 0, decomp_info%m - 1
                 f(i,j,0,3) = f(i+1,j,0,3)
@@ -245,21 +245,21 @@ contains
         end do
 
         ! Top to bottom
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = decomp_info%n, 1, -1
             do i = 0, decomp_info%m
                 f(i,j,0,2) = f(i,j-1,0,2)
             end do
         end do
 
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = decomp_info%n, 1, -1
             do i = decomp_info%m, 1, -1
                 f(i,j,0,5) = f(i-1,j-1,0,5)
             end do
         end do
 
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = decomp_info%n, 1, -1
             do i = 0, decomp_info%m - 1
                 f(i,j,0,6) = f(i+1,j-1,0,6)
@@ -267,21 +267,21 @@ contains
         end do
 
         ! Bottom to top
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, decomp_info%n - 1
             do i = 0, decomp_info%m
                 f(i,j,0,4) = f(i,j+1,0,4)
             end do
         end do
 
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, decomp_info%n - 1
             do i = 0, decomp_info%m - 1
                 f(i,j,0,7) = f(i+1,j+1,0,7)
             end do
         end do
 
-        !$acc parallel loop vector gang default(present) collapse(2)
+        !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, decomp_info%n - 1
             do i = decomp_info%m, 1, -1
                 f(i,j,0,8) = f(i-1,j+1,0,8)
@@ -302,7 +302,7 @@ contains
         integer :: i, j, k, l
 
         if (num_dims == 2) then
-            !$acc parallel loop vector gang default(present) collapse(2)
+            !$acc parallel loop collapse(2) gang vector default(present)
             do j = 0, decomp_info%n
                 do i = 0, decomp_info%m
                     Q(i,j,0,0) = f(i,j,0,0) + f(i,j,0,1) + f(i,j,0,2) + &
@@ -315,7 +315,7 @@ contains
                 end do
             end do
         elseif (num_dims == 3) then
-            !$acc parallel loop vector gang default(present) collapse(3)
+            !$acc parallel loop collapse(3) gang vector default(present)
             do k = 0, decomp_info%p
                 do j = 0, decomp_info%n
                     do i = 0, decomp_info%m

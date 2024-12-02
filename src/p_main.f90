@@ -39,12 +39,21 @@ program p_main
     do i = 1, time_info%t_step_stop
         call cpu_time(t_start)
         call s_collision(Q,f,fEq)
+!$acc update host(f)
+call s_print_2d_array(f(:,:,0,0))
+call s_print_2d_array(f(:,:,0,1))
+call s_print_2d_array(f(:,:,0,2))
+call s_print_2d_array(f(:,:,0,3))
+call s_print_2d_array(f(:,:,0,4))
+call s_print_2d_array(f(:,:,0,5))
+call s_print_2d_array(f(:,:,0,6))
+call s_print_2d_array(f(:,:,0,7))
+call s_print_2d_array(f(:,:,0,8))
         call s_streaming(f)
         call s_apply_boundary_conditions(f)
         call s_compute_prim_vars(Q, f)
         call cpu_time(t_stop)
         t_comp = t_comp + (t_stop - t_start)
-        print*, i
         if (mod(i, time_info%t_step_save) == 0) then
             call cpu_time(t_start)
             call s_save_data(Q,i)
