@@ -181,7 +181,7 @@ contains
                     do l = 0, coll_op%Q - 1
                         cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
                         fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
-                            4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
+                            4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
                         f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, 0, l)
                     end do
                 end do

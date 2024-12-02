@@ -68,8 +68,8 @@ contains
                 2.0d0 * (f(i, decomp_info%n, 0, 2) + &
                 f(i, decomp_info%n, 0, 5) + f(i, decomp_info%n, 0, 6))
             f(i, decomp_info%n, 0, 4) = f(i, decomp_info%n, 0, 2)
-            f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5) - rhoW*lidVel/6.0
-            f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6) + rhoW*lidVel/6.0
+            f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5) - rhoW*lidVel/6d0
+            f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6) + rhoW*lidVel/6d0
             !f(i, decomp_info%n, 0, 4) = f(i, decomp_info%n, 0, 2)
             !f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5)
             !f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6)
