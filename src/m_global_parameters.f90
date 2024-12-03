@@ -18,18 +18,35 @@ module m_global_parameters
     real(kind(0d0)), parameter :: pi = 3.141592653589793
     integer, parameter :: default_int = -100
     real(kind(0d0)), parameter :: default_real = -1d6
-    real(kind(0d0)), parameter :: cs = 1d0/sqrt(3d0)
+    real(kind(0d0)), parameter :: cs = 1d0/sqrt(3d0) ! Lattice speed of sound
     real(kind(0d0)) :: lidVel
     real(kind(0d0)), parameter :: alpha = 0.01d0 ! Lattice viscosity
 
     !$acc declare create(pi, default_int, default_real, cs, lidVel, alpha)
 
-    type(timestepping_info) :: time_info
-    type(decomposition_info) :: decomp_info
-    type(collision_operator) :: coll_op
-    type(coordinate_info) :: coord_info
+    integer :: t_step_stop, t_step_save
+    real(kind(0d0)) :: dt, tau
 
-    !$acc declare create(time_info, decomp_info, coll_op, coord_info)
+    !$acc declare create(t_step_stop, t_step_save, dt, tau)
+
+    integer :: m, n, p
+
+    !$acc declare create(m, n, p)
+
+    real(kind(0d0)), dimension(:), allocatable :: x_cb    ! x cell boundaries
+    real(kind(0d0)), dimension(:), allocatable :: y_cb    ! y cell boundaries
+    real(kind(0d0)), dimension(:), allocatable :: z_cb    ! z cell boundaries
+
+    !$acc declare create(x_cb, y_cb, z_cb)
+
+    real(kind(0d0)), dimension(0:19) :: ws ! weights
+    integer, dimension(0:19) :: cx ! x component of c_i
+    integer, dimension(0:19) :: cy ! y component of c_i
+    integer, dimension(0:19) :: cz ! z component of c_i
+    integer :: D ! Dimension of lattice
+    integer :: nQ ! Number of velocities
+
+    !$acc declare create(ws, cx, cy, cz, D, nQ)
 
     real(kind(0d0)) :: C
 

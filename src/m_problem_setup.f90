@@ -44,34 +44,37 @@ contains
         integer :: i
 
         ! Allocating cell boundary locations
-        allocate(coord_info%x_cb(0:decomp_info%m + 1))
-        allocate(coord_info%y_cb(0:decomp_info%n + 1))
+        allocate(x_cb(0:m + 1))
+        allocate(y_cb(0:n + 1))
+        !$acc enter data create(x_cb, y_cb)
         if (num_dims == 3) then
-            allocate(coord_info%z_cb(0:decomp_info%p + 1))
+            allocate(z_cb(0:p + 1))
+            !$acc enter data create(z_cb)
         end if
-        !$acc enter data create(coord_info)
 
-        allocate(Q(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:num_dims))
+        allocate(Q(0:m, 0:n, 0:p, 0:num_dims))
         !$acc enter data create(Q)
 
-        allocate(f(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:coll_op%Q))
-        allocate(fEq(0:decomp_info%m, 0:decomp_info%n, 0:decomp_info%p, 0:coll_op%Q))
+        allocate(f(0:m, 0:n, 0:p, 0:nQ))
+        allocate(fEq(0:m, 0:n, 0:p, 0:nQ))
         !$acc enter data create(f, fEq)
 
-        do i = 0, decomp_info%m + 1
-            coord_info%x_cb(i) = i
+        do i = 0, m + 1
+            x_cb(i) = i
         end do
+        !$acc update device(x_cb)
 
-        do i = 0, decomp_info%m + 1
-            coord_info%y_cb(i) = i
+        do i = 0, m + 1
+            y_cb(i) = i
         end do
+        !$acc update device(y_cb)
 
         if (num_dims == 3) then
-            do i = 0, decomp_info%p + 1
-                coord_info%z_cb(i) = i
+            do i = 0, p + 1
+                z_cb(i) = i
             end do
+            !$acc update device(z_cb)
         end if
-        !$acc update device(coord_info)
 
         ! Setup case specific details
         select case(problemID)

@@ -19,138 +19,134 @@ contains
     ! This subroutine assigns the collision operator for the D2Q9 lattice. It
     ! takes 1 input:
     ! coll_op: a collision_operator type variable describing the operator
-    subroutine s_assign_D2Q9_collision_operator(coll_op)
+    subroutine s_assign_D2Q9_collision_operator()
 
-        type(collision_operator) :: coll_op
+        ws(0) = 4d0/9d0
+        ws(1) = 1d0/9d0
+        ws(2) = 1d0/9d0
+        ws(3) = 1d0/9d0
+        ws(4) = 1d0/9d0
+        ws(5) = 1d0/36d0
+        ws(6) = 1d0/36d0
+        ws(7) = 1d0/36d0
+        ws(8) = 1d0/36d0
 
-        coll_op%w(0) = 4d0/9d0
-        coll_op%w(1) = 1d0/9d0
-        coll_op%w(2) = 1d0/9d0
-        coll_op%w(3) = 1d0/9d0
-        coll_op%w(4) = 1d0/9d0
-        coll_op%w(5) = 1d0/36d0
-        coll_op%w(6) = 1d0/36d0
-        coll_op%w(7) = 1d0/36d0
-        coll_op%w(8) = 1d0/36d0
+        cx(0) = 0
+        cx(1) = 1
+        cx(2) = 0
+        cx(3) = -1
+        cx(4) = 0
+        cx(5) = 1
+        cx(6) = -1
+        cx(7) = -1
+        cx(8) = 1
 
-        coll_op%cx(0) = 0
-        coll_op%cx(1) = 1
-        coll_op%cx(2) = 0
-        coll_op%cx(3) = -1
-        coll_op%cx(4) = 0
-        coll_op%cx(5) = 1
-        coll_op%cx(6) = -1
-        coll_op%cx(7) = -1
-        coll_op%cx(8) = 1
+        cy(0) = 0
+        cy(1) = 0
+        cy(2) = 1
+        cy(3) = 0
+        cy(4) = -1
+        cy(5) = 1
+        cy(6) = 1
+        cy(7) = -1
+        cy(8) = -1
 
-        coll_op%cy(0) = 0
-        coll_op%cy(1) = 0
-        coll_op%cy(2) = 1
-        coll_op%cy(3) = 0
-        coll_op%cy(4) = -1
-        coll_op%cy(5) = 1
-        coll_op%cy(6) = 1
-        coll_op%cy(7) = -1
-        coll_op%cy(8) = -1
+        D = 2
+        nQ = 9
 
-        coll_op%D = 2
-        coll_op%Q = 9
-
-        !$acc update device(coll_op)
+        !$acc update device(ws, cx, cy, D, nQ)
 
     end subroutine s_assign_D2Q9_collision_operator
 
     ! This subroutine assigns the collision operator for the D3Q19 lattice. It
     ! takes 1 input:
     ! coll_op: a collision_operator type variable describing the operator
-    subroutine s_assign_D3Q19_collision_operator(coll_op)
+    subroutine s_assign_D3Q19_collision_operator()
 
-        type(collision_operator) :: coll_op
+        ws(0) = 1d0/3d0
+        ws(1) = 1d0/18d0
+        ws(2) = 1d0/18d0
+        ws(3) = 1d0/18d0
+        ws(4) = 1d0/18d0
+        ws(5) = 1d0/18d0
+        ws(6) = 1d0/18d0
+        ws(7) = 1d0/36d0
+        ws(8) = 1d0/36d0
+        ws(9) = 1d0/36d0
+        ws(10) = 1d0/36d0
+        ws(11) = 1d0/36d0
+        ws(12) = 1d0/36d0
+        ws(13) = 1d0/36d0
+        ws(14) = 1d0/36d0
+        ws(15) = 1d0/36d0
+        ws(16) = 1d0/36d0
+        ws(17) = 1d0/36d0
+        ws(18) = 1d0/36d0
 
-        coll_op%w(0) = 1d0/3d0
-        coll_op%w(1) = 1d0/18d0
-        coll_op%w(2) = 1d0/18d0
-        coll_op%w(3) = 1d0/18d0
-        coll_op%w(4) = 1d0/18d0
-        coll_op%w(5) = 1d0/18d0
-        coll_op%w(6) = 1d0/18d0
-        coll_op%w(7) = 1d0/36d0
-        coll_op%w(8) = 1d0/36d0
-        coll_op%w(9) = 1d0/36d0
-        coll_op%w(10) = 1d0/36d0
-        coll_op%w(11) = 1d0/36d0
-        coll_op%w(12) = 1d0/36d0
-        coll_op%w(13) = 1d0/36d0
-        coll_op%w(14) = 1d0/36d0
-        coll_op%w(15) = 1d0/36d0
-        coll_op%w(16) = 1d0/36d0
-        coll_op%w(17) = 1d0/36d0
-        coll_op%w(18) = 1d0/36d0
+        cx(0) = 0
+        cx(1) = 1
+        cx(2) = -1
+        cx(3) = 0
+        cx(4) = 0
+        cx(5) = 0
+        cx(6) = 0
+        cx(7) = 1
+        cx(8) = -1
+        cx(9) = 1
+        cx(10) = -1
+        cx(11) = 0
+        cx(12) = 0
+        cx(13) = 1
+        cx(14) = -1
+        cx(15) = 1
+        cx(16) = -1
+        cx(17) = 0
+        cx(18) = 0
 
-        coll_op%cx(0) = 0
-        coll_op%cx(1) = 1
-        coll_op%cx(2) = -1
-        coll_op%cx(3) = 0
-        coll_op%cx(4) = 0
-        coll_op%cx(5) = 0
-        coll_op%cx(6) = 0
-        coll_op%cx(7) = 1
-        coll_op%cx(8) = -1
-        coll_op%cx(9) = 1
-        coll_op%cx(10) = -1
-        coll_op%cx(11) = 0
-        coll_op%cx(12) = 0
-        coll_op%cx(13) = 1
-        coll_op%cx(14) = -1
-        coll_op%cx(15) = 1
-        coll_op%cx(16) = -1
-        coll_op%cx(17) = 0
-        coll_op%cx(18) = 0
+        cy(0) = 0
+        cy(1) = 0
+        cy(2) = 0
+        cy(3) = 1
+        cy(4) = -1
+        cy(5) = 0
+        cy(6) = 0
+        cy(7) = 1
+        cy(8) = -1
+        cy(9) = 0
+        cy(10) = 0
+        cy(11) = 1
+        cy(12) = -1
+        cy(13) = -1
+        cy(14) = 1
+        cy(15) = 0
+        cy(16) = 0
+        cy(17) = 1
+        cy(18) = -1
 
-        coll_op%cy(0) = 0
-        coll_op%cy(1) = 0
-        coll_op%cy(2) = 0
-        coll_op%cy(3) = 1
-        coll_op%cy(4) = -1
-        coll_op%cy(5) = 0
-        coll_op%cy(6) = 0
-        coll_op%cy(7) = 1
-        coll_op%cy(8) = -1
-        coll_op%cy(9) = 0
-        coll_op%cy(10) = 0
-        coll_op%cy(11) = 1
-        coll_op%cy(12) = -1
-        coll_op%cy(13) = -1
-        coll_op%cy(14) = 1
-        coll_op%cy(15) = 0
-        coll_op%cy(16) = 0
-        coll_op%cy(17) = 1
-        coll_op%cy(18) = -1
+        cz(0) = 0
+        cz(1) = 0
+        cz(2) = 0
+        cz(3) = 0
+        cz(4) = 0
+        cz(5) = 1
+        cz(6) = -1
+        cz(7) = 0
+        cz(8) = 0
+        cz(9) = 1
+        cz(10) = -1
+        cz(11) = 1
+        cz(12) = -1
+        cz(13) = 0
+        cz(14) = 0
+        cz(15) = -1
+        cz(16) = 1
+        cz(17) = -1
+        cz(18) = 1
 
-        coll_op%cz(0) = 0
-        coll_op%cz(1) = 0
-        coll_op%cz(2) = 0
-        coll_op%cz(3) = 0
-        coll_op%cz(4) = 0
-        coll_op%cz(5) = 1
-        coll_op%cz(6) = -1
-        coll_op%cz(7) = 0
-        coll_op%cz(8) = 0
-        coll_op%cz(9) = 1
-        coll_op%cz(10) = -1
-        coll_op%cz(11) = 1
-        coll_op%cz(12) = -1
-        coll_op%cz(13) = 0
-        coll_op%cz(14) = 0
-        coll_op%cz(15) = -1
-        coll_op%cz(16) = 1
-        coll_op%cz(17) = -1
-        coll_op%cz(18) = 1
+        D = 3
+        nQ = 19
 
-        coll_op%D = 3
-        coll_op%Q = 19
-
-        !$acc update device(coll_op)
+        !$acc update device(ws, cx, cy, D, nQ)
 
     end subroutine s_assign_D3Q19_collision_operator
 
@@ -167,39 +163,39 @@ contains
 
         real(kind(0d0)) :: rho, u, v, w
 
-        C = time_info%dt/time_info%tau
+        C = dt/tau
         !$acc update device(C)
 
         if (num_dims == 2) then
             !$acc parallel loop collapse(2) gang vector default(present) private(rho, u, v, cidotu)
-            do j = 0, decomp_info%n
-                do i = 0, decomp_info%m
+            do j = 0, n
+                do i = 0, m
                     rho = Q(i,j,0,0)
                     u = Q(i,j,0,1)
                     v = Q(i,j,0,2)
                     !$acc loop seq
-                    do l = 0, coll_op%Q - 1
-                        cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
-                        fEq(i,j,0,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
+                    do l = 0, nQ - 1
+                        cidotu = cx(l)*u + cy(l)*v
+                        fEq(i,j,0,l) = rho*ws(l)*(1d0 + 3d0*cidotu + &
                             4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v))
                         f(i,j,0,l) = f(i,j,0,l)*(1d0-C) + C*feq(i, j, 0, l)
                     end do
                 end do
             end do
         else
-            !$acc parallel loop collapse(3) gang vector default(present) private(rho, u, v, cidotu)
-            do k = 0, decomp_info%p
-                do j = 0, decomp_info%n
-                    do i = 0, decomp_info%m
+            !$acc parallel loop collapse(3) gang vector default(present) private(rho, u, v, w, cidotu)
+            do k = 0, p
+                do j = 0, n
+                    do i = 0, m
                         rho = Q(i,j,k,0)
                         u = Q(i,j,k,1)
                         v = Q(i,j,k,2)
                         w = Q(i,j,k,3)
                         !$acc loop seq
-                        do l = 0, coll_op%Q - 1
-                            cidotu = coll_op%cx(l)*u + coll_op%cy(l)*v
-                            fEq(i,j,k,l) = rho*coll_op%w(l)*(1d0 + 3d0*cidotu + &
-                                4.5d0*cidotu**2d0 - 1.5d0*(u**2d0 + v**2d0))
+                        do l = 0, nQ - 1
+                            cidotu = cx(l)*u + cy(l)*v + cz(l)*w
+                            fEq(i,j,k,l) = rho*ws(l)*(1d0 + 3d0*cidotu + &
+                                4.5d0*cidotu*cidotu - 1.5d0*(u*u + v*v + w*w))
                             f(i,j,k,l) = f(i,j,k,l)*(1d0-C) + C*feq(i, j, k, l)
                         end do
                     end do
@@ -231,59 +227,59 @@ contains
 
         ! Side to side
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, decomp_info%n
-            do i = decomp_info%m, 1, -1
+        do j = 0, n
+            do i = m, 1, -1
                 f(i,j,0,1) = f(i-1,j,0,1)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, decomp_info%n
-            do i = 0, decomp_info%m - 1
+        do j = 0, n
+            do i = 0, m - 1
                 f(i,j,0,3) = f(i+1,j,0,3)
             end do
         end do
 
         ! Top to bottom
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = decomp_info%n, 1, -1
-            do i = 0, decomp_info%m
+        do j = n, 1, -1
+            do i = 0, m
                 f(i,j,0,2) = f(i,j-1,0,2)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = decomp_info%n, 1, -1
-            do i = decomp_info%m, 1, -1
+        do j = n, 1, -1
+            do i = m, 1, -1
                 f(i,j,0,5) = f(i-1,j-1,0,5)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = decomp_info%n, 1, -1
-            do i = 0, decomp_info%m - 1
+        do j = n, 1, -1
+            do i = 0, m - 1
                 f(i,j,0,6) = f(i+1,j-1,0,6)
             end do
         end do
 
         ! Bottom to top
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, decomp_info%n - 1
-            do i = 0, decomp_info%m
+        do j = 0, n - 1
+            do i = 0, m
                 f(i,j,0,4) = f(i,j+1,0,4)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, decomp_info%n - 1
-            do i = 0, decomp_info%m - 1
+        do j = 0, n - 1
+            do i = 0, m - 1
                 f(i,j,0,7) = f(i+1,j+1,0,7)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, decomp_info%n - 1
-            do i = decomp_info%m, 1, -1
+        do j = 0, n - 1
+            do i = m, 1, -1
                 f(i,j,0,8) = f(i-1,j+1,0,8)
             end do
         end do
@@ -303,8 +299,8 @@ contains
 
         if (num_dims == 2) then
             !$acc parallel loop collapse(2) gang vector default(present)
-            do j = 0, decomp_info%n
-                do i = 0, decomp_info%m
+            do j = 0, n
+                do i = 0, m
                     Q(i,j,0,0) = f(i,j,0,0) + f(i,j,0,1) + f(i,j,0,2) + &
                         f(i,j,0,3) + f(i,j,0,4) + f(i,j,0,5) + f(i,j,0,6) + &
                         f(i,j,0,7) + f(i,j,0,8)
@@ -316,19 +312,19 @@ contains
             end do
         elseif (num_dims == 3) then
             !$acc parallel loop collapse(3) gang vector default(present)
-            do k = 0, decomp_info%p
-                do j = 0, decomp_info%n
-                    do i = 0, decomp_info%m
+            do k = 0, p
+                do j = 0, n
+                    do i = 0, m
                         Q(i,j,k,0) = 0d0
                         Q(i,j,k,1) = 0d0
                         Q(i,j,k,2) = 0d0
                         Q(i,j,k,3) = 0d0
                         !$acc loop seq
-                        do l = 0, coll_op%Q - 1
+                        do l = 0, nQ - 1
                             Q(i,j,k,0) = Q(i,j,k,0) + f(i,j,k,l)
-                            Q(i,j,k,1) = Q(i,j,k,1) + f(i,j,k,l)*coll_op%cx(l)
-                            Q(i,j,k,2) = Q(i,j,k,2) + f(i,j,k,l)*coll_op%cy(l)
-                            Q(i,j,k,3) = Q(i,j,k,3) + f(i,j,k,l)*coll_op%cy(l)
+                            Q(i,j,k,1) = Q(i,j,k,1) + f(i,j,k,l)*cx(l)
+                            Q(i,j,k,2) = Q(i,j,k,2) + f(i,j,k,l)*cy(l)
+                            Q(i,j,k,3) = Q(i,j,k,3) + f(i,j,k,l)*cy(l)
                         end do
                         Q(i,j,k,1) = Q(i,j,k,1)/Q(i,j,k,0)
                         Q(i,j,k,2) = Q(i,j,k,2)/Q(i,j,k,0)

@@ -38,7 +38,7 @@ contains
 
         ! Left bounce back
         !$acc parallel loop gang vector default(present)
-        do i = 0, decomp_info%n
+        do i = 0, n
             f(0, i, 0, 1) = f(0, i, 0, 3)
             f(0, i, 0, 5) = f(0, i, 0, 7)
             f(0, i, 0, 8) = f(0, i, 0, 6)
@@ -46,15 +46,15 @@ contains
 
         ! Right bounce back
         !$acc parallel loop gang vector default(present)
-        do i = 0, decomp_info%n
-            f(decomp_info%m, i, 0, 3) = f(decomp_info%m, i, 0, 1)
-            f(decomp_info%m, i, 0, 7) = f(decomp_info%m, i, 0, 5)
-            f(decomp_info%m, i, 0, 6) = f(decomp_info%m, i, 0, 8)
+        do i = 0, n
+            f(m, i, 0, 3) = f(m, i, 0, 1)
+            f(m, i, 0, 7) = f(m, i, 0, 5)
+            f(m, i, 0, 6) = f(m, i, 0, 8)
         end do
 
         ! Bottom bounce back
         !$acc parallel loop gang vector default(present)
-        do i = 0, decomp_info%m
+        do i = 0, m
             f(i, 0, 0, 2) = f(i, 0, 0, 4)
             f(i, 0, 0, 5) = f(i, 0, 0, 7)
             f(i, 0, 0, 6) = f(i, 0, 0, 8)
@@ -62,17 +62,12 @@ contains
 
         ! Top moving lid
         !$acc parallel loop gang vector default(present) private(rhoW)
-        do i = 1, decomp_info%m - 1
-            rhoW = f(i, decomp_info%n, 0, 0) + f(i, decomp_info%n, 0, 1) + &
-                f(i, decomp_info%n, 0, 3) + &
-                2.0d0 * (f(i, decomp_info%n, 0, 2) + &
-                f(i, decomp_info%n, 0, 5) + f(i, decomp_info%n, 0, 6))
-            f(i, decomp_info%n, 0, 4) = f(i, decomp_info%n, 0, 2)
-            f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5) - rhoW*lidVel/6d0
-            f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6) + rhoW*lidVel/6d0
-            !f(i, decomp_info%n, 0, 4) = f(i, decomp_info%n, 0, 2)
-            !f(i, decomp_info%n, 0, 7) = f(i, decomp_info%n, 0, 5)
-            !f(i, decomp_info%n, 0, 8) = f(i, decomp_info%n, 0, 6)
+        do i = 1, m - 1
+            rhoW = f(i, n, 0, 0) + f(i, n, 0, 1) + f(i, n, 0, 3) + &
+                2.0d0 * (f(i, n, 0, 2) + f(i, n, 0, 5) + f(i, n, 0, 6))
+            f(i, n, 0, 4) = f(i, n, 0, 2)
+            f(i, n, 0, 7) = f(i, n, 0, 5) - rhoW*lidVel/6d0
+            f(i, n, 0, 8) = f(i, n, 0, 6) + rhoW*lidVel/6d0
         end do
 
     end subroutine s_apply_boundary_conditions_2d

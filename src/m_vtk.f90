@@ -58,13 +58,13 @@ contains
         write(3,"(A)") "<?xml version='1.0'?>"
         write(3,"(A)") "<VTKFile type='RectilinearGrid' version='0.1' byte_order='LittleEndian'>"
         if (num_dims == 2) then
-            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%m + 1))//" "// &
-                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%n + 1))//" "// &
+            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(m + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(n + 1))//" "// &
                     trim(f_int_to_str(0))//" "//trim(f_int_to_str(0))
         else
-            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%m + 1))//" "// &
-                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%n + 1))//" "// &
-                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(decomp_info%p + 1))
+            line = trim(f_int_to_str(0))//" "//trim(f_int_to_str(m + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(n + 1))//" "// &
+                    trim(f_int_to_str(0))//" "//trim(f_int_to_str(p + 1))
         end if
         write(3,"(A)") "    <RectilinearGrid WholeExtent='"//trim(line)//"'>"
         write(3,"(A)") "        <Piece Extent='"//trim(line)//"'>"
@@ -73,8 +73,8 @@ contains
         write(3,"(A)") "            <Coordinates>"
         write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
         write(3,"(A)",advance='no') "               "
-        do i = 0, decomp_info%m + 1
-            write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%x_cb(i)))//" "
+        do i = 0, m + 1
+            write(3,"(A)",advance='no') trim(f_dbl_to_str(x_cb(i)))//" "
         end do
         write(3,*)
         write(3,"(A)") "                </DataArray>"
@@ -82,8 +82,8 @@ contains
         ! y-coordinates
         write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
         write(3,"(A)",advance='no') "               "
-        do i = 0, decomp_info%n + 1
-            write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%y_cb(i)))//" "
+        do i = 0, n + 1
+            write(3,"(A)",advance='no') trim(f_dbl_to_str(y_cb(i)))//" "
         end do
         write(3,*)
         write(3,"(A)") "                </DataArray>"
@@ -98,8 +98,8 @@ contains
         else
             write(3,"(A)") "                <DataArray type='Float64' format='ascii'>"
             write(3,"(A)",advance='no') "               "
-            do i = 0, decomp_info%p + 1
-                write(3,"(A)",advance='no') trim(f_dbl_to_str(coord_info%z_cb(i)))//" "
+            do i = 0, p + 1
+                write(3,"(A)",advance='no') trim(f_dbl_to_str(z_cb(i)))//" "
             end do
             write(3,*)
             write(3,"(A)") "                </DataArray>"
@@ -125,15 +125,15 @@ contains
 
         write(3,"(A)") "                <DataArray type='Float64' Name='"//trim(name)//"' format='ascii'>"
         if (num_dims == 2) then
-            do j = 0, decomp_info%n
-                do i = 0, decomp_info%m
+            do j = 0, n
+                do i = 0, m
                     write(3,"(A)",advance='no') trim(f_dbl_to_str(Q(i,j,0)))//" "
                 end do
             end do
         else
-            do k = 0, decomp_info%p
-                do j = 0, decomp_info%n
-                    do i = 0, decomp_info%m
+            do k = 0, p
+                do j = 0, n
+                    do i = 0, m
                         write(3,"(A)",advance='no') trim(f_dbl_to_str(Q(i,j,k)))//" "
                     end do
                 end do

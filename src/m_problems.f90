@@ -22,14 +22,14 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        decomp_info%m = 16
-        decomp_info%n = 16
+        m = 16
+        n = 16
 
-        time_info%dt = 1d0
-        time_info%t_step_stop = 2
-        time_info%t_step_save = 1
+        dt = 1d0
+        t_step_stop = 100
+        t_step_save = 100
 
-        !$acc update device(decomp_info, time_info)
+        !$acc update device(m, n, dt, t_step_stop, t_step_save)
 
     end subroutine s_get_2D_lid_driven_cavity
 
@@ -43,21 +43,13 @@ contains
         integer :: i, j
 
         !$acc parallel loop vector gang default(present) collapse(2)
-        do j = 0, decomp_info%n
-            do i = 0, decomp_info%m
+        do j = 0, n
+            do i = 0, m
                 Q(i, j, 0, 0) = 5d0
                 Q(i, j, 0, 1) = 0d0
                 Q(i, j, 0, 2) = 0d0
             end do
         end do
-
-        !do j = 45,55
-            !do i = 45,55
-                !Q(i, j, 0, 0) = 7d0
-                !Q(i, j, 0, 1) = 0d0
-                !Q(i, j, 0, 2) = 0d0
-            !end do
-        !end do
 
     end subroutine s_setup_2D_lid_driven_cavity
 
@@ -67,15 +59,15 @@ contains
     subroutine s_get_3D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        decomp_info%m = 100
-        decomp_info%n = 100
-        decomp_info%p = 100
+        m = 100
+        n = 100
+        p = 100
 
-        time_info%dt = 1d0
-        time_info%t_step_stop = 100000
-        time_info%t_step_save = 100000
+        dt = 1d0
+        t_step_stop = 100000
+        t_step_save = 100000
 
-        !$acc update device(decomp_info, time_info)
+        !$acc update device(m, n, p, dt, t_step_stop, t_step_save)
 
     end subroutine s_get_3D_lid_driven_cavity
 
@@ -86,9 +78,9 @@ contains
         integer :: i, j, k
 
         !$acc parallel loop vector gang default(present) collapse(3)
-        do k = 0, decomp_info%p
-            do j = 0, decomp_info%n
-                do i = 0, decomp_info%m
+        do k = 0, p
+            do j = 0, n
+                do i = 0, m
                     Q(i, j, k, 0) = 5d0
                     Q(i, j, k, 1) = 0d0
                     Q(i, j, k, 2) = 0d0
