@@ -21,11 +21,11 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        m = 16
-        n = 16
+        m = 100
+        n = 100
 
         dt = 1d0
-        t_step_stop = 100
+        t_step_stop = 10000
         t_step_save = 100
 
         !$acc update device(m, n, dt, t_step_stop, t_step_save)
@@ -49,6 +49,16 @@ contains
                 Q(i, j, 0, 2) = 0d0
             end do
         end do
+
+        !$acc parallel loop vector gang default(present) collapse(2)
+        do j = 45, 55
+            do i = 45, 55
+                Q(i, j, 0, 0) = 10d0
+                Q(i, j, 0, 1) = 0d0
+                Q(i, j, 0, 2) = 0d0
+            end do
+        end do
+
 
     end subroutine s_setup_2D_lid_driven_cavity
 

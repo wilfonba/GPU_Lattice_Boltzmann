@@ -38,7 +38,7 @@ program p_main
 
     do i = 1, t_step_stop
         call cpu_time(t_start)
-        print*, i
+        print*, "Time step: ", i
         call s_collision(Q,f,fEq)
         call s_streaming(f)
         call s_apply_boundary_conditions(f)
@@ -48,7 +48,6 @@ program p_main
         if (mod(i, t_step_save) == 0) then
             call cpu_time(t_start)
             call s_save_data(Q,i)
-            print*, "Time step: ", i
             call cpu_time(t_stop)
             t_io = t_io + (t_stop - t_start)
         end if
