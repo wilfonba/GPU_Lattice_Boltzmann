@@ -37,3 +37,4 @@ data/*
 
 *.nsys-rep
 *.sqlite
+*.swp
