@@ -42,7 +42,7 @@ contains
     ! n_save: The number of the save
     subroutine s_open_vtk_data_file(n_save)
 
-        integer :: N, i, n_save
+        integer :: i, n_save
 
         character(len=100) :: file_name
         character(len=20) :: dir_name = 'data'

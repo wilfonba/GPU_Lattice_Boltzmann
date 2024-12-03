@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 project(MyFortranProject LANGUAGES Fortran)
 
 # Set compiler flags if needed (optional)
-set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -hacc -O0")
+set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -acc -O0")
 #set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -O3")
 
 # Set the Fortran standard (optional)
