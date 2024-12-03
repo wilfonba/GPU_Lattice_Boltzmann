@@ -1,7 +1,6 @@
 module m_global_parameters
 
     ! Dependencies ===================================
-    use m_derived_types
     ! =================================================
 
     implicit none

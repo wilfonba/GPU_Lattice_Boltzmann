@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-export FC=nvfortran
+#export FC=nvfortran
 
 cmake -S . -B build
 

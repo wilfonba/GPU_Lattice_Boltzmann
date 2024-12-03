@@ -2,7 +2,6 @@ module m_lattice_boltzmann
 
     ! Dependencies ==========================================
     use m_global_parameters
-    use m_derived_types
     use m_boundary_conditions
     ! =======================================================
 

@@ -2,7 +2,6 @@ module m_boundary_conditions
 
     ! Dependencies ==========================================
     use m_global_parameters
-    use m_derived_types
     ! =======================================================
 
     implicit none

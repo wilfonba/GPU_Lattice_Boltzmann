@@ -1,7 +1,6 @@
 module m_problems
 
     ! Dependencies ==========================================
-    use m_derived_types
     use m_global_parameters
     ! =======================================================
 
