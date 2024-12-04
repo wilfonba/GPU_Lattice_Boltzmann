@@ -38,3 +38,4 @@ data/*
 *.nsys-rep
 *.sqlite
 *.swp
+*.ncu-rep
