@@ -11,7 +11,7 @@ module m_global_parameters
     ! =========================================================================
     integer, parameter :: problemID = 1
     integer, parameter :: num_dims = 3
-    real(kind(0d0)) :: Re = 10000
+    real(kind(0d0)) :: Re = 1000
     ! =========================================================================
 
     real(kind(0d0)), parameter :: pi = 3.141592653589793

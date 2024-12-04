@@ -72,8 +72,8 @@ contains
         p = 200
 
         dt = 1d0
-        t_step_stop = 500000
-        t_step_save = 5000
+        t_step_stop = 10
+        t_step_save = 10
 
         !$acc update device(m, n, p, dt, t_step_stop, t_step_save)
 
