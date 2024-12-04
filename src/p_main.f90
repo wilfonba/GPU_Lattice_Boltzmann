@@ -34,7 +34,7 @@ program p_main
 
     print*, "Re = ", Re, "lidVel = ", lidVel, "tau = ", tau
 
-    !call s_save_data(Q,0)
+    call s_save_data(Q,0)
 
     t_comp = 0d0; t_io = 0d0
 
@@ -49,7 +49,7 @@ program p_main
         t_comp = t_comp + (t_stop - t_start)
         if (mod(i, t_step_save) == 0) then
             call cpu_time(t_start)
-            !call s_save_data(Q,i)
+            call s_save_data(Q,i)
             call cpu_time(t_stop)
             t_io = t_io + (t_stop - t_start)
         end if

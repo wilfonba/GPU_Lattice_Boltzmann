@@ -1,6 +1,8 @@
 module m_helper
 
     ! Dependencies ==========================================
+    use ieee_arithmetic
+    use m_global_parameters
     ! =======================================================
 
     implicit none

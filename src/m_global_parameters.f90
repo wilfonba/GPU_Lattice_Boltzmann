@@ -11,7 +11,7 @@ module m_global_parameters
     ! =========================================================================
     integer, parameter :: problemID = 1
     integer, parameter :: num_dims = 3
-    real(kind(0d0)) :: Re = 1000
+    real(kind(0d0)) :: Re = 10000
     ! =========================================================================
 
     real(kind(0d0)), parameter :: pi = 3.141592653589793
@@ -38,10 +38,10 @@ module m_global_parameters
 
     !$acc declare create(x_cb, y_cb, z_cb)
 
-    real(kind(0d0)), dimension(0:19) :: ws ! weights
-    integer, dimension(0:19) :: cx ! x component of c_i
-    integer, dimension(0:19) :: cy ! y component of c_i
-    integer, dimension(0:19) :: cz ! z component of c_i
+    real(kind(0d0)), dimension(0:18) :: ws ! weights
+    integer, dimension(0:18) :: cx ! x component of c_i
+    integer, dimension(0:18) :: cy ! y component of c_i
+    integer, dimension(0:18) :: cz ! z component of c_i
     integer :: D ! Dimension of lattice
     integer :: nQ ! Number of velocities
 

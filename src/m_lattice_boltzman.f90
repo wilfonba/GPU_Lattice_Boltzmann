@@ -145,7 +145,7 @@ contains
         D = 3
         nQ = 19
 
-        !$acc update device(ws, cx, cy, D, nQ)
+        !$acc update device(ws, cx, cy, cz, D, nQ)
 
     end subroutine s_assign_D3Q19_collision_operator
 
@@ -182,7 +182,8 @@ contains
                 end do
             end do
         else
-            !$acc parallel loop collapse(3) gang vector default(present) private(rho, u, v, w, cidotu)
+            !$acc parallel loop  gang vector collapse(3) default(present) &
+            !$acc private(rho, u, v, w, cidotu)
             do k = 0, p
                 do j = 0, n
                     do i = 0, m

@@ -21,12 +21,12 @@ contains
     subroutine s_get_2D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        m = 100
-        n = 100
+        m = 2000
+        n = 2000
 
         dt = 1d0
-        t_step_stop = 40000
-        t_step_save = 400
+        t_step_stop = 10000000
+        t_step_save = 100000
 
         !$acc update device(m, n, dt, t_step_stop, t_step_save)
 
@@ -67,13 +67,13 @@ contains
     subroutine s_get_3D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        m = 400
-        n = 400
-        p = 400
+        m = 200
+        n = 200
+        p = 200
 
         dt = 1d0
-        t_step_stop = 100
-        t_step_save = 100
+        t_step_stop = 500000
+        t_step_save = 5000
 
         !$acc update device(m, n, p, dt, t_step_stop, t_step_save)
 
@@ -107,17 +107,6 @@ contains
                 end do
             end do
         end do
-
-        !do k = 23, 27
-            !do j = 23, 27
-                !do i = 23, 27
-                    !Q(i, j, k, 0) = 10d0
-                    !Q(i, j, k, 1) = 0d0
-                    !Q(i, j, k, 2) = 0d0
-                    !Q(i, j, k, 3) = 0d0
-                !end do
-            !end do
-        !end do
 
     end subroutine s_setup_3D_lid_driven_cavity
 
