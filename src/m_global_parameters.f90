@@ -9,8 +9,8 @@ module m_global_parameters
     ! Select the problem ID and number of dimensions by changing the parameters
     ! here so that compiler optimizations can be made
     ! =========================================================================
-    integer, parameter :: problemID = 0
-    integer, parameter :: num_dims = 2
+    integer, parameter :: problemID = 1
+    integer, parameter :: num_dims = 3
     real(kind(0d0)) :: Re = 1000
     ! =========================================================================
 
@@ -24,7 +24,7 @@ module m_global_parameters
     !$acc declare create(pi, default_int, default_real, cs, lidVel, alpha)
 
     integer :: t_step_stop, t_step_save
-    real(kind(0d0)) :: dt, tau
+    real(kind(0d0)) :: dt, tau, nu
 
     !$acc declare create(t_step_stop, t_step_save, dt, tau)
 

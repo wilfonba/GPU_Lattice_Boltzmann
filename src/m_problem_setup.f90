@@ -36,10 +36,11 @@ contains
     !  Q: The scalar field that will be used to store the initial condition
     !  f: The distribution function
     !  fEq: The equilibrium distribution function
-    subroutine s_setup_problem(Q, f, fEq)
+    subroutine s_setup_problem(Q, f, fEq, fOld)
 
         real(kind(0d0)), allocatable, dimension(:,:,:,:) :: Q
-        real(kind(0d0)), allocatable, dimension(:,:,:,:) :: f, fEq
+        real(kind(0d0)), allocatable, dimension(:,:,:,:) :: f, fEq, fOld
+
         integer :: i
 
         ! Allocating cell boundary locations
@@ -56,7 +57,8 @@ contains
 
         allocate(f(0:m, 0:n, 0:p, 0:nQ))
         allocate(fEq(0:m, 0:n, 0:p, 0:nQ))
-        !$acc enter data create(f, fEq)
+        allocate(fOld(0:m, 0:n, 0:p, 0:nQ))
+        !$acc enter data create(f, fEq, fOld)
 
         do i = 0, m + 1
             x_cb(i) = i
@@ -78,9 +80,9 @@ contains
         ! Setup case specific details
         select case(problemID)
             case(0)
-                call s_setup_2D_lid_driven_cavity(Q)
+                call s_setup_2D_lid_driven_cavity(Q, f)
             case(1)
-                call s_setup_3D_lid_driven_cavity(Q)
+                call s_setup_3D_lid_driven_cavity(Q, f)
         end select
 
     end subroutine s_setup_problem

@@ -206,84 +206,274 @@ contains
 
     ! This subroutine performs the streaming step of the LBM. Its input is
     !  f: a 4D array holding the distribution functions
-    subroutine s_streaming(f)
+    subroutine s_streaming(f, fOld)
 
         real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: fOld
 
         if (num_dims == 2) then
-            call s_streaming_2d(f)
+            call s_streaming_2d(f, fOld)
         else
-            call s_streaming_3d(f)
+            call s_streaming_3d(f, fOld)
         end if
 
     end subroutine s_streaming
 
-    subroutine s_streaming_2d(f)
+    subroutine s_streaming_2d(f, fOld)
 
         real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: fOld
 
-        integer :: i, j
+        integer :: i, j, k
 
-        ! Side to side
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = 0, n
-            do i = m, 1, -1
-                f(i,j,0,1) = f(i-1,j,0,1)
+        do k = 0, nQ - 1
+            do j = 0, n
+                do i = 0, m
+                    fOld(i,j,0,k) = f(i,j,0,k)
+                end do
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, n
-            do i = 0, m - 1
-                f(i,j,0,3) = f(i+1,j,0,3)
+            do i = 1, m
+                f(i,j,0,1) = fOld(i-1,j,0,1)
             end do
         end do
 
-        ! Top to bottom
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = n, 1, -1
+        do j = 1, n
             do i = 0, m
-                f(i,j,0,2) = f(i,j-1,0,2)
+                f(i,j,0,2) = fOld(i,j-1,0,2)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
-        do j = n, 1, -1
-            do i = m, 1, -1
-                f(i,j,0,5) = f(i-1,j-1,0,5)
-            end do
-        end do
-
-        !$acc parallel loop collapse(2) gang vector default(present)
-        do j = n, 1, -1
+        do j = 0, n
             do i = 0, m - 1
-                f(i,j,0,6) = f(i+1,j-1,0,6)
+                f(i,j,0,3) = fOld(i+1,j,0,3)
             end do
         end do
 
-        ! Bottom to top
         !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, n - 1
             do i = 0, m
-                f(i,j,0,4) = f(i,j+1,0,4)
+                f(i,j,0,4) = fOld(i,j+1,0,4)
+            end do
+        end do
+
+        !$acc parallel loop collapse(2) gang vector default(present)
+        do j = 1, n
+            do i = 1, n
+                f(i,j,0,5) = fOld(i-1,j-1,0,5)
+            end do
+        end do
+
+        !$acc parallel loop collapse(2) gang vector default(present)
+        do j = 1, n
+            do i = 0, m - 1
+                f(i,j,0,6) = fOld(i+1,j-1,0,6)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, n - 1
             do i = 0, m - 1
-                f(i,j,0,7) = f(i+1,j+1,0,7)
+                f(i,j,0,7) = fOld(i+1,j+1,0,7)
             end do
         end do
 
         !$acc parallel loop collapse(2) gang vector default(present)
         do j = 0, n - 1
-            do i = m, 1, -1
-                f(i,j,0,8) = f(i-1,j+1,0,8)
+            do i = 1, m
+                f(i,j,0,8) = fOld(i-1,j+1,0,8)
             end do
         end do
 
     end subroutine s_streaming_2d
+
+    subroutine s_streaming_3d(f, fOld)
+
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: f
+        real(kind(0d0)), dimension(0:, 0:, 0:, 0:) :: fOld
+
+        integer :: i, j, k, l
+
+        !$acc parallel loop collapse(4) gang vector default(present)
+        do l = 0, nQ - 1
+            do k = 0, p
+                do j = 0, n
+                    do i = 0, m
+                        fOld(i,j,k,l) = f(i,j,k,l)
+                    end do
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 0, n
+                do i = 1, m
+                    f(i,j,k,1) = fOld(i-1,j,k,1)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 0, n
+                do i = 0, m-1
+                    f(i,j,k,2) = fOld(i+1,j,k,2)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 1, n
+                do i = 0,m
+                    f(i,j,k,3) = fOld(i,j-1,k,3)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 0, n-1
+                do i = 0, m
+                    f(i,j,k,4) = fOld(i,j+1,k,4)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 1, p
+            do j = 0, n
+                do i = 0, m
+                    f(i,j,k,5) = fOld(i,j,k-1,5)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p - 1
+            do j = 0, n
+                do i = 0, m
+                    f(i,j,k,6) = fOld(i,j,k+1,6)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 1, n
+                do i = 1, m
+                    f(i,j,k,7) = fOld(i-1,j-1,k,7)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 0, n - 1
+                do i = 0, m - 1
+                    f(i,j,k,8) = fOld(i+1,j+1,k,8)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 1, p
+            do j = 0, n
+                do i = 1, m
+                    f(i,j,k,9) = fOld(i-1,j,k-1,9)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p - 1
+            do j = 0, n
+                do i = 1, m
+                    f(i,j,k,10) = fOld(i-1,j,k+1,10)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 1, p
+            do j = 1, n
+                do i = 0, m
+                    f(i,j,k,11) = fOld(i,j-1,k-1,11)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p - 1
+            do j = 0, n - 1
+                do i = 0, m
+                    f(i,j,k,12) = fOld(i,j+1,k+1,12)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 0, n - 1
+                do i = 1, m
+                    f(i,j,k,13) = fOld(i-1,j+1,k,13)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p
+            do j = 1, n
+                do i = 0, m - 1
+                    f(i,j,k,14) = fOld(i+1,j-1,k,14)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p - 1
+            do j = 0, n
+                do i = 1, m
+                    f(i,j,k,15) = fOld(i-1,j,k+1,15)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 1, p
+            do j = 0, n
+                do i = 0, m - 1
+                    f(i,j,k,16) = fOld(i+1,j,k-1,16)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 0, p - 1
+            do j = 1, n
+                do i = 0, m
+                    f(i,j,k,17) = fOld(i,j-1,k+1,17)
+                end do
+            end do
+        end do
+
+        !$acc parallel loop collapse(3) gang vector default(present)
+        do k = 1, p
+            do j = 0, n - 1
+                do i = 0, m
+                    f(i,j,k,18) = fOld(i,j+1,k-1,18)
+                end do
+            end do
+        end do
+
+    end subroutine s_streaming_3d
 
     ! This subroutine computes the primitive variables from the distribution
     ! function. Its inputs are:
@@ -303,8 +493,10 @@ contains
                     Q(i,j,0,0) = f(i,j,0,0) + f(i,j,0,1) + f(i,j,0,2) + &
                         f(i,j,0,3) + f(i,j,0,4) + f(i,j,0,5) + f(i,j,0,6) + &
                         f(i,j,0,7) + f(i,j,0,8)
+
                     Q(i,j,0,1) = (f(i,j,0,1) + f(i,j,0,5) + f(i,j,0,8) - &
                         f(i,j,0,3) - f(i,j,0,6) - f(i,j,0,7))/Q(i,j,0,0)
+
                     Q(i,j,0,2) = (f(i,j,0,2) + f(i,j,0,5) + f(i,j,0,6) - &
                         f(i,j,0,4) - f(i,j,0,7) - f(i,j,0,8))/Q(i,j,0,0)
                 end do
@@ -314,20 +506,23 @@ contains
             do k = 0, p
                 do j = 0, n
                     do i = 0, m
-                        Q(i,j,k,0) = 0d0
-                        Q(i,j,k,1) = 0d0
-                        Q(i,j,k,2) = 0d0
-                        Q(i,j,k,3) = 0d0
-                        !$acc loop seq
-                        do l = 0, nQ - 1
-                            Q(i,j,k,0) = Q(i,j,k,0) + f(i,j,k,l)
-                            Q(i,j,k,1) = Q(i,j,k,1) + f(i,j,k,l)*cx(l)
-                            Q(i,j,k,2) = Q(i,j,k,2) + f(i,j,k,l)*cy(l)
-                            Q(i,j,k,3) = Q(i,j,k,3) + f(i,j,k,l)*cy(l)
-                        end do
-                        Q(i,j,k,1) = Q(i,j,k,1)/Q(i,j,k,0)
-                        Q(i,j,k,2) = Q(i,j,k,2)/Q(i,j,k,0)
-                        Q(i,j,k,3) = Q(i,j,k,3)/Q(i,j,k,0)
+                        Q(i,j,k,0) = f(i,j,k,0) + f(i,j,k,1) + f(i,j,k,2) + &
+                            f(i,j,k,3) + f(i,j,k,4) + f(i,j,k,5) + f(i,j,k,6) + &
+                            f(i,j,k,7) + f(i,j,k,8) + f(i,j,k,9) + f(i,j,k,10) + &
+                            f(i,j,k,11) + f(i,j,k,12) + f(i,j,k,13) + f(i,j,k,14) + &
+                            f(i,j,k,15) + f(i,j,k,16) + f(i,j,k,17) + f(i,j,k,18)
+
+                        Q(i,j,k,1) = (f(i,j,k,1) - f(i,j,k,2) + f(i,j,k,7) - &
+                            f(i,j,k,8) + f(i,j,k,9) - f(i,j,k,10) + f(i,j,k,13) - &
+                            f(i,j,k,14) + f(i,j,k,15) - f(i,j,k,16))/Q(i,j,k,0)
+
+                        Q(i,j,k,2) = (f(i,j,k,3) - f(i,j,k,4) + f(i,j,k,7) - &
+                            f(i,j,k,8) + f(i,j,k,11) - f(i,j,k,12) - f(i,j,k,13) + &
+                            f(i,j,k,14) + f(i,j,k,17) - f(i,j,k,18))/Q(i,j,k,0)
+
+                        Q(i,j,k,3) = (f(i,j,k,5) - f(i,j,k,6) + f(i,j,k,9) - &
+                            f(i,j,k,10) + f(i,j,k,11) - f(i,j,k,12) - f(i,j,k,15) + &
+                            f(i,j,k,16) - f(i,j,k,17) + f(i,j,k,18))/Q(i,j,k,0)
                     end do
                 end do
             end do

@@ -16,23 +16,25 @@ program p_main
     real(kind(0d0)) :: t_start, t_stop, t_comp, t_io
 
     real(kind(0d0)), dimension(:,:,:,:), allocatable :: Q
-    real(kind(0d0)), dimension(:,:,:,:), allocatable :: f,fEq
+    real(kind(0d0)), dimension(:,:,:,:), allocatable :: f,fEq, fOld
+    !$acc declare create(Q, f, fEq, fOld)
 
     if (num_dims == 2) call s_assign_D2Q9_collision_operator()
     if (num_dims == 3) call s_assign_D3Q19_collision_operator()
 
     call s_get_problem()
 
-    call s_setup_problem(Q, f, fEq)
+    call s_setup_problem(Q, f, fEq, fOld)
 
-    lidVel = alpha*Re/m
-    tau = (3d0*alpha + 0.5d0)
+    tau = (3*alpha + 0.5)
+    nu = (1d0/3d0)*(tau - 0.5)
+    lidVel = nu*Re/m
 
     !$acc update device(lidVel, tau)
 
     print*, "Re = ", Re, "lidVel = ", lidVel, "tau = ", tau
 
-    call s_save_data(Q,0)
+    !call s_save_data(Q,0)
 
     t_comp = 0d0; t_io = 0d0
 
@@ -40,14 +42,14 @@ program p_main
         call cpu_time(t_start)
         print*, "Time step: ", i
         call s_collision(Q,f,fEq)
-        call s_streaming(f)
+        call s_streaming(f, fOld)
         call s_apply_boundary_conditions(f)
         call s_compute_prim_vars(Q, f)
         call cpu_time(t_stop)
         t_comp = t_comp + (t_stop - t_start)
         if (mod(i, t_step_save) == 0) then
             call cpu_time(t_start)
-            call s_save_data(Q,i)
+            !call s_save_data(Q,i)
             call cpu_time(t_stop)
             t_io = t_io + (t_stop - t_start)
         end if
