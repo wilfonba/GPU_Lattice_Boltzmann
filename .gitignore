@@ -39,3 +39,4 @@ data/*
 *.sqlite
 *.swp
 *.ncu-rep
+main
