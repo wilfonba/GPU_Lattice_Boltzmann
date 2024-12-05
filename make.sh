@@ -1,8 +1,16 @@
 #!/usr/bin/env sh
 
-#export FC=nvfortran
+rm -rf build
 
-cmake -S . -B build
+MODE=${1:-serial}
+
+if [ "$MODE" = "multicore" ] || [ "$MODE" = "gpu" ]; then
+    export FC=nvfortran
+fi
+
+echo $MODE
+
+cmake -DCMAKE_BUILD_TYPE=$MODE -S . -B build
 
 cmake --build build
 

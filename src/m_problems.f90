@@ -67,13 +67,13 @@ contains
     subroutine s_get_3D_lid_driven_cavity()
 
         ! Global number of grid points in each direction
-        m = 200
-        n = 200
-        p = 200
+        m = 100
+        n = 100
+        p = 100
 
         dt = 1d0
-        t_step_stop = 10
-        t_step_save = 10
+        t_step_stop = 100
+        t_step_save = 100
 
         !$acc update device(m, n, p, dt, t_step_stop, t_step_save)
 
